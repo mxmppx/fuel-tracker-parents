@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Fuel Tracker">
+<meta name="theme-color" content="#f5f5f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f0f13" media="(prefers-color-scheme: dark)">
+<title>Fuel Tracker</title>
+<style>
+  :root{--bg:#f5f5f7;--bg2:#fff;--border:#e0e0e8;--border2:#ebebf0;--text:#1a1a2e;--text2:#555566;--text3:#999aaa;--tab-active-bg:#e8e8f0;--tab-active-color:#1a1a2e;--input-bg:#f0f0f5;--preview-bg:#f0f0f5;--row-hover:#f8f8fc;--highlight-bg:#eeeeff;--highlight-border:#c8c8ff;--alert-bg:#fff8ee;--alert-border:#f59e0b60;--modal-bg:#fff;}
+  @media(prefers-color-scheme:dark){:root{--bg:#0f0f13;--bg2:#1a1a24;--border:#2a2a3a;--border2:#1a1a24;--text:#e0e0e0;--text2:#aaa;--text3:#666677;--tab-active-bg:#2a2a3a;--tab-active-color:#fff;--input-bg:#0f0f13;--preview-bg:#0f0f13;--row-hover:#1a1a2480;--highlight-bg:#4f46e510;--highlight-border:#4f46e540;--alert-bg:#2d1a0a;--alert-border:#f59e0b40;--modal-bg:#1a1a24;}}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:env(safe-area-inset-bottom);}
+  header{background:var(--bg2);border-bottom:1px solid var(--border);padding:16px 24px;padding-top:calc(16px + env(safe-area-inset-top));display:flex;align-items:center;gap:12px;}
+  header h1{font-size:1.2rem;font-weight:600;}
+  .tab-bar{display:flex;gap:4px;margin-left:auto;}
+  .tab{padding:8px 12px;border-radius:8px;cursor:pointer;font-size:0.82rem;background:transparent;color:var(--text3);border:none;transition:all 0.2s;}
+  .tab.active{background:var(--tab-active-bg);color:var(--tab-active-color);}
+  .container{max-width:960px;margin:0 auto;padding:24px 16px;}
+  .card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px;}
+  .card h2{font-size:0.9rem;font-weight:600;margin-bottom:16px;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;}
+  .vehicle-toggle{display:flex;gap:8px;margin-bottom:20px;}
+  .v-btn{flex:1;padding:12px;border-radius:8px;border:2px solid var(--border);background:transparent;color:var(--text3);cursor:pointer;font-size:0.9rem;transition:all 0.2s;}
+  .v-btn.active.skoda{border-color:#4ade80;color:#16a34a;background:#4ade8015;}
+  @media(prefers-color-scheme:dark){.v-btn.active.skoda{color:#4ade80;}}
+  .v-btn.active.mg{border-color:#f97316;color:#ea6e00;background:#f9731615;}
+  @media(prefers-color-scheme:dark){.v-btn.active.mg{color:#f97316;}}
+  .fields{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px;}
+  .field label{display:block;font-size:0.78rem;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;}
+  .field input{width:100%;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:1rem;outline:none;transition:border-color 0.2s;}
+  .field input:focus{border-color:#4f46e5;}
+  .preview{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px;background:var(--preview-bg);border-radius:8px;padding:16px;}
+  .prev-item{text-align:center;}
+  .prev-item .val{font-size:1.1rem;font-weight:600;}
+  .prev-item .lbl{font-size:0.72rem;color:var(--text3);margin-top:2px;}
+  .submit-btn{width:100%;padding:14px;border-radius:8px;border:none;background:#4f46e5;color:#fff;font-size:1rem;font-weight:600;cursor:pointer;}
+  .submit-btn:disabled{background:var(--border);color:var(--text3);cursor:not-allowed;}
+  .warn-box{background:#fff8ee;border:1px solid #f59e0b60;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:0.85rem;color:#b45309;}
+  @media(prefers-color-scheme:dark){.warn-box{background:#2d1a0a;color:#fbbf24;}}
+  .msg{text-align:center;padding:10px;border-radius:8px;margin-top:12px;font-size:0.9rem;}
+  .msg.success{background:#0d2d1a;color:#34d399;}
+  .msg.error{background:#2d0d0d;color:#f87171;}
+  .filter-bar{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;align-items:center;}
+  .filter-btn{padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text3);cursor:pointer;font-size:0.82rem;transition:all 0.2s;}
+  .filter-btn.active{background:var(--tab-active-bg);color:var(--tab-active-color);}
+  .filter-select{background:var(--bg2);border:1px solid var(--border);border-radius:20px;color:var(--text2);padding:6px 14px;font-size:0.82rem;outline:none;cursor:pointer;}
+  .export-btn{margin-left:auto;padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;font-size:0.82rem;}
+  .stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px;}
+  .stats-grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+  .stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px;}
+  .stat-card .label{font-size:0.75rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;}
+  .stat-card .value{font-size:1.5rem;font-weight:700;}
+  .stat-card .sub{font-size:0.78rem;color:var(--text3);margin-top:4px;}
+  .stat-card.highlight{border-color:var(--highlight-border);background:var(--highlight-bg);}
+  .skoda-color{color:#16a34a;} @media(prefers-color-scheme:dark){.skoda-color{color:#4ade80;}}
+  .mg-color{color:#ea6e00;} @media(prefers-color-scheme:dark){.mg-color{color:#f97316;}}
+  .green{color:#16a34a;} @media(prefers-color-scheme:dark){.green{color:#34d399;}}
+  .red{color:#dc2626;} @media(prefers-color-scheme:dark){.red{color:#f87171;}}
+  .purple{color:#7c3aed;} @media(prefers-color-scheme:dark){.purple{color:#a78bfa;}}
+  .chart-wrap{overflow-x:auto;padding-bottom:8px;}
+  .chart{display:flex;align-items:flex-end;gap:4px;height:150px;min-width:400px;padding-top:30px;}
+  .bar-group{display:flex;flex-direction:column;align-items:center;flex:1;min-width:32px;}
+  .bar{width:100%;border-radius:4px 4px 0 0;min-height:2px;}
+  .bar:hover{opacity:0.8;}
+  .bar-label{font-size:0.62rem;color:var(--text3);margin-top:4px;text-align:center;white-space:nowrap;}
+  .bar-val{font-size:0.65rem;color:var(--text2);margin-bottom:2px;}
+  .bw-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;}
+  .bw-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px;}
+  .bw-card .bw-title{font-size:0.75rem;color:var(--text3);text-transform:uppercase;margin-bottom:10px;}
+  .bw-card .bw-val{font-size:1.3rem;font-weight:700;margin-bottom:4px;}
+  .bw-card .bw-date{font-size:0.78rem;color:var(--text3);}
+  .alert-box{background:var(--alert-bg);border:1px solid var(--alert-border);border-radius:12px;padding:16px;margin-bottom:20px;}
+  .alert-box h3{font-size:0.85rem;color:#f59e0b;margin-bottom:10px;}
+  .alert-item{font-size:0.82rem;color:var(--text);padding:6px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px;}
+  .alert-item:last-child{border-bottom:none;}
+  .alert-item .reason{color:#f59e0b;font-size:0.75rem;}
+  table{width:100%;border-collapse:collapse;font-size:0.85rem;}
+  th{text-align:left;padding:10px 12px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);font-size:0.75rem;text-transform:uppercase;}
+  td{padding:8px 12px;border-bottom:1px solid var(--border2);color:var(--text);}
+  tr:hover td{background:var(--row-hover);}
+  .badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:0.75rem;font-weight:600;}
+  .badge.skoda{background:#4ade8020;color:#16a34a;} @media(prefers-color-scheme:dark){.badge.skoda{color:#4ade80;}}
+  .badge.mg{background:#f9731620;color:#ea6e00;} @media(prefers-color-scheme:dark){.badge.mg{color:#f97316;}}
+  .loading{text-align:center;padding:40px;color:var(--text3);}
+  .empty{text-align:center;padding:40px;color:var(--text3);font-size:0.9rem;}
+  .action-btn{background:none;border:none;cursor:pointer;font-size:0.95rem;opacity:0.4;padding:2px 4px;transition:opacity 0.2s;}
+  .action-btn:hover{opacity:1;}
+  .modal-overlay{display:none;position:fixed;inset:0;background:#00000060;z-index:100;align-items:center;justify-content:center;padding:16px;}
+  .modal-overlay.open{display:flex;}
+  .modal{background:var(--modal-bg);border-radius:16px;padding:24px;width:100%;max-width:420px;border:1px solid var(--border);}
+  .modal h3{font-size:1rem;font-weight:600;margin-bottom:20px;}
+  .modal-btns{display:flex;gap:8px;margin-top:20px;}
+  .modal-btns button{flex:1;padding:12px;border-radius:8px;border:none;cursor:pointer;font-size:0.95rem;font-weight:600;}
+  .btn-cancel{background:var(--border);color:var(--text2);}
+  .btn-save{background:#4f46e5;color:#fff;}
+  @media(max-width:600px){.fields{grid-template-columns:1fr 1fr;}.stats-grid{grid-template-columns:1fr 1fr;}.stats-grid-4{grid-template-columns:1fr 1fr;}.bw-grid{grid-template-columns:1fr 1fr;}}
+</style>
+</head>
+<body>
+<header>
+  <span style="font-size:1.4rem">⛽</span>
+  <h1>Fuel Tracker</h1>
+  <div class="tab-bar">
+    <button class="tab active" onclick="showTab('stats')">Stats</button>
+    <button class="tab" onclick="showTab('historique')">Historique</button>
+    <button class="tab" onclick="showTab('saisie')">Saisie</button>
+  </div>
+</header>
+
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal">
+    <h3>✏️ Modifier le plein</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="field"><label>Km</label><input type="number" id="edit-km" step="0.1"></div>
+      <div class="field"><label>Litres</label><input type="number" id="edit-litres" step="0.01"></div>
+      <div class="field"><label>CHF/L</label><input type="number" id="edit-chf" step="0.001"></div>
+      <div class="field"><label>Véhicule</label>
+        <select id="edit-vehicule" style="width:100%;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:1rem;outline:none;">
+          <option value="skoda">🚗 Skoda Octavia</option>
+          <option value="mg">🚗 MG 3</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal()">Annuler</button>
+      <button class="btn-save" onclick="saveEdit()">Enregistrer</button>
+    </div>
+    <input type="hidden" id="edit-id">
+  </div>
+</div>
+
+<div class="container">
+  <div id="tab-stats">
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="setVFilter('all',this)">Tout</button>
+      <button class="filter-btn" onclick="setVFilter('skoda',this)">🚗 Skoda</button>
+      <button class="filter-btn" onclick="setVFilter('mg',this)">🚗 MG 3</button>
+      <select class="filter-select" id="filter-year" onchange="setYearFilter(this.value)"><option value="all">Toutes les années</option></select>
+      <select class="filter-select" id="filter-month" onchange="setMonthFilter(this.value)"><option value="all">Tous les mois</option></select>
+    </div>
+    <div id="stats-content"><div class="loading">Chargement...</div></div>
+  </div>
+
+  <div id="tab-historique" style="display:none">
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="setHistoFilter('all',this)">Tout</button>
+      <button class="filter-btn" onclick="setHistoFilter('skoda',this)">🚗 Skoda</button>
+      <button class="filter-btn" onclick="setHistoFilter('mg',this)">🚗 MG 3</button>
+      <button class="export-btn" onclick="exportCSV()">⬇️ Export CSV</button>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <div id="histo-content"><div class="loading">Chargement...</div></div>
+    </div>
+  </div>
+
+  <div id="tab-saisie" style="display:none">
+    <div class="card">
+      <h2>Nouveau plein</h2>
+      <div class="vehicle-toggle">
+        <button class="v-btn active skoda" id="btn-skoda" onclick="selectVehicule('skoda')">🚗 Skoda Octavia</button>
+        <button class="v-btn" id="btn-mg" onclick="selectVehicule('mg')">🚗 MG 3</button>
+      </div>
+      <div class="fields">
+        <div class="field"><label>Km depuis dernier plein</label><input type="number" id="km" placeholder="ex: 500" oninput="updatePreview()" step="0.1"></div>
+        <div class="field"><label>Nombre de litres</label><input type="number" id="litres" placeholder="ex: 35" oninput="updatePreview()" step="0.01"></div>
+        <div class="field"><label>Prix / litre (CHF)</label><input type="number" id="chf" placeholder="ex: 1.65" oninput="updatePreview()" step="0.001"></div>
+      </div>
+      <div id="saisie-warn" style="display:none" class="warn-box"></div>
+      <div class="preview">
+        <div class="prev-item"><div class="val" id="prev-conso">—</div><div class="lbl">L/100km</div></div>
+        <div class="prev-item"><div class="val" id="prev-prix">—</div><div class="lbl">Prix payé (CHF)</div></div>
+        <div class="prev-item"><div class="val" id="prev-p100">—</div><div class="lbl">CHF/100km</div></div>
+        <div class="prev-item"><div class="val" id="prev-auto-th">—</div><div class="lbl">Autonomie théo. (km)</div></div>
+        <div class="prev-item"><div class="val" id="prev-auto-re">—</div><div class="lbl">Autonomie restante (km)</div></div>
+        <div class="prev-item"><div class="val" id="prev-vehicule">🚗</div><div class="lbl">Véhicule</div></div>
+      </div>
+      <button class="submit-btn" id="submit-btn" onclick="submitPlein()">Enregistrer le plein</button>
+      <div id="msg"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL='https://sgmsgcclwyvzxdeucdba.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNnbXNnY2Nsd3l2enhkZXVjZGJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4MjY5NTgsImV4cCI6MjA5NjQwMjk1OH0.r87yMr3IfWoxj_La5_326kEjJpN2aa9BbiRTYIxhXD8';
+const VEHICLES={skoda:{label:'Skoda Octavia',cap:55},mg:{label:'MG 3',cap:36}};
+const MONTHS=['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+let vehicule='skoda',allData=[],histoFilter='all';
+let filters={vehicule:'all',year:'all',month:'all'};
+
+function api(path,opts={}){
+  return fetch(SUPABASE_URL+'/rest/v1/'+path,{...opts,headers:{
+    'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json',
+    ...(opts.method==='POST'?{'Prefer':'return=minimal'}:{}),
+    ...(opts.method==='PATCH'?{'Prefer':'return=minimal'}:{}),
+    ...opts.headers
+  }});
+}
+
+function getLabel(v){return VEHICLES[v]?.label??v;}
+function getCap(v){return VEHICLES[v]?.cap??50;}
+function getEmoji(v){return '🚗';}
+
+function selectVehicule(v){
+  vehicule=v;
+  Object.keys(VEHICLES).forEach(k=>{
+    const btn=document.getElementById('btn-'+k);
+    if(btn) btn.className='v-btn'+(k===v?' active '+k:'');
+  });
+  document.getElementById('prev-vehicule').textContent=getLabel(v);
+  updatePreview();
+}
+
+function updatePreview(){
+  const km=parseFloat(document.getElementById('km').value);
+  const l=parseFloat(document.getElementById('litres').value);
+  const chf=parseFloat(document.getElementById('chf').value);
+  const cap=getCap(vehicule);
+  const conso=(km&&l)?l/km*100:null;
+  const prix=(l&&chf)?l*chf:null;
+  document.getElementById('prev-conso').textContent=conso?conso.toFixed(2):'—';
+  document.getElementById('prev-prix').textContent=prix?prix.toFixed(2):'—';
+  document.getElementById('prev-p100').textContent=(prix&&km)?(prix/km*100).toFixed(2):'—';
+  document.getElementById('prev-auto-th').textContent=conso?Math.round(cap/conso*100):'—';
+  document.getElementById('prev-auto-re').textContent=(conso&&l)?Math.round((cap-l)/conso*100):'—';
+  const warns=[];
+  if(km&&conso){
+    if(conso<3) warns.push('⚠️ Consommation très faible ('+conso.toFixed(2)+' L/100)');
+    if(conso>20) warns.push('⚠️ Consommation très élevée ('+conso.toFixed(2)+' L/100)');
+    if(l>cap*1.05) warns.push('⚠️ Litres > capacité du réservoir ('+cap+'L)');
+    if(km<30) warns.push('⚠️ Très peu de km depuis le dernier plein');
+  }
+  const w=document.getElementById('saisie-warn');
+  if(warns.length){w.innerHTML=warns.join('<br>');w.style.display='block';}else w.style.display='none';
+}
+
+async function submitPlein(){
+  const km=parseFloat(document.getElementById('km').value);
+  const litres=parseFloat(document.getElementById('litres').value);
+  const chf_par_litre=parseFloat(document.getElementById('chf').value);
+  const msg=document.getElementById('msg');
+  if(!km||!litres||!chf_par_litre){msg.className='msg error';msg.textContent='Remplis tous les champs !';return;}
+  const btn=document.getElementById('submit-btn');
+  btn.disabled=true;btn.textContent='Enregistrement...';
+  try{
+    const res=await api('pleins',{method:'POST',body:JSON.stringify({vehicule,km,litres,chf_par_litre})});
+    if(!res.ok) throw new Error(await res.text());
+    msg.className='msg success';msg.textContent='✅ Plein enregistré !';
+    document.getElementById('km').value='';
+    document.getElementById('litres').value='';
+    document.getElementById('chf').value='';
+    document.getElementById('saisie-warn').style.display='none';
+    updatePreview();await loadData();
+  }catch(e){msg.className='msg error';msg.textContent='❌ '+e.message;}
+  btn.disabled=false;btn.textContent='Enregistrer le plein';
+  setTimeout(()=>msg.textContent='',4000);
+}
+
+function openEdit(r){
+  document.getElementById('edit-id').value=r.id;
+  document.getElementById('edit-km').value=r.km;
+  document.getElementById('edit-litres').value=r.litres;
+  document.getElementById('edit-chf').value=r.chf_par_litre;
+  document.getElementById('edit-vehicule').value=r.vehicule;
+  document.getElementById('edit-modal').classList.add('open');
+}
+function closeModal(){document.getElementById('edit-modal').classList.remove('open');}
+
+async function saveEdit(){
+  const id=document.getElementById('edit-id').value;
+  const km=parseFloat(document.getElementById('edit-km').value);
+  const litres=parseFloat(document.getElementById('edit-litres').value);
+  const chf_par_litre=parseFloat(document.getElementById('edit-chf').value);
+  const vehicule=document.getElementById('edit-vehicule').value;
+  if(!km||!litres||!chf_par_litre) return;
+  await api('pleins?id=eq.'+id,{method:'PATCH',body:JSON.stringify({km,litres,chf_par_litre,vehicule})});
+  closeModal();await loadData();
+}
+
+async function deletePlein(id){
+  if(!confirm('Supprimer ce plein définitivement ?')) return;
+  await api('pleins?id=eq.'+id,{method:'DELETE'});
+  await loadData();
+}
+
+function exportCSV(){
+  const data=histoFilter==='all'?allData:allData.filter(r=>r.vehicule===histoFilter);
+  const h=['date','vehicule','km','litres','chf_par_litre','l_aux_100','prix_paye','prix_aux_100km','autonomie_theorique','autonomie_restante'];
+  const rows=data.map(r=>[fmtDate(r.created_at),r.vehicule,r.km,r.litres,r.chf_par_litre,r.l_aux_100,r.prix_paye,r.prix_aux_100km,r.autonomie_theorique,r.autonomie_restante].join(','));
+  const csv=[h.join(','),...rows].join('\n');
+  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='fuel_tracker_parents.csv';a.click();
+}
+
+async function loadData(){
+  const res=await api('pleins?select=*&order=created_at.desc&limit=2000');
+  allData=await res.json();
+  populateYearFilter();renderStats();renderHisto();
+}
+
+function populateYearFilter(){
+  const years=[...new Set(allData.map(r=>new Date(r.created_at).getFullYear()))].sort((a,b)=>b-a);
+  const sel=document.getElementById('filter-year');
+  const currentYear=new Date().getFullYear();
+  const alreadySet=sel.dataset.initialized;
+  sel.innerHTML='<option value="all">Toutes les années</option>'+years.map(y=>`<option value="${y}">${y}</option>`).join('');
+  if(!alreadySet){const def=years.includes(currentYear)?currentYear:(years[0]||'all');sel.value=def;filters.year=def;sel.dataset.initialized='1';}
+  else if(filters.year!=='all') sel.value=filters.year;
+}
+
+function setVFilter(v,el){filters.vehicule=v;document.querySelectorAll('#tab-stats .filter-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active');renderStats();}
+function setYearFilter(val){
+  filters.year=val;
+  const sel=document.getElementById('filter-month');
+  if(val==='all'){sel.innerHTML='<option value="all">Tous les mois</option>';filters.month='all';}
+  else{const months=[...new Set(allData.filter(r=>new Date(r.created_at).getFullYear()==val).map(r=>new Date(r.created_at).getMonth()))].sort((a,b)=>a-b);sel.innerHTML='<option value="all">Tous les mois</option>'+months.map(m=>`<option value="${m}">${MONTHS[m]}</option>`).join('');filters.month='all';}
+  renderStats();
+}
+function setMonthFilter(val){filters.month=val;renderStats();}
+function setHistoFilter(f,el){histoFilter=f;document.querySelectorAll('#tab-historique .filter-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active');renderHisto();}
+
+function getFiltered(){
+  return allData.filter(r=>{
+    const d=new Date(r.created_at);
+    if(filters.vehicule!=='all'&&r.vehicule!==filters.vehicule) return false;
+    if(filters.year!=='all'&&d.getFullYear()!=filters.year) return false;
+    if(filters.month!=='all'&&d.getMonth()!=filters.month) return false;
+    return true;
+  });
+}
+
+function avg(arr,key){const v=arr.map(r=>r[key]).filter(x=>x!=null);return v.length?v.reduce((a,b)=>a+b,0)/v.length:null;}
+function sum(arr,key){return arr.reduce((a,r)=>a+(r[key]||0),0);}
+function fmt(n,d=2){return n!=null?n.toFixed(d):'—';}
+function fmtDate(s){return new Date(s).toLocaleDateString('fr-CH',{day:'2-digit',month:'short',year:'numeric'});}
+
+function bwCards(data,v){
+  const wc=data.filter(r=>r.l_aux_100&&r.vehicule===v);
+  if(!wc.length) return '';
+  const best=wc.reduce((a,b)=>a.l_aux_100<b.l_aux_100?a:b);
+  const worst=wc.reduce((a,b)=>a.l_aux_100>b.l_aux_100?a:b);
+  const bestA=wc.reduce((a,b)=>(a.autonomie_theorique||0)>(b.autonomie_theorique||0)?a:b);
+  const worstA=wc.reduce((a,b)=>(a.autonomie_theorique||999)<(b.autonomie_theorique||999)?a:b);
+  const lbl=getLabel(v);
+  return`
+    <div class="bw-card"><div class="bw-title">🏆 ${lbl} — Meilleure conso</div><div class="bw-val green">${fmt(best.l_aux_100)} L/100</div><div class="bw-date">${fmtDate(best.created_at)} · ${best.km} km</div></div>
+    <div class="bw-card"><div class="bw-title">📉 ${lbl} — Pire conso</div><div class="bw-val red">${fmt(worst.l_aux_100)} L/100</div><div class="bw-date">${fmtDate(worst.created_at)} · ${worst.km} km</div></div>
+    <div class="bw-card"><div class="bw-title">🛣️ ${lbl} — Meilleure autonomie</div><div class="bw-val green">${bestA.autonomie_theorique??'—'} km</div><div class="bw-date">${fmtDate(bestA.created_at)}</div></div>
+    <div class="bw-card"><div class="bw-title">🪫 ${lbl} — Pire autonomie</div><div class="bw-val red">${worstA.autonomie_theorique??'—'} km</div><div class="bw-date">${fmtDate(worstA.created_at)}</div></div>`;
+}
+
+function renderStats(){
+  const data=getFiltered();
+  const el=document.getElementById('stats-content');
+  if(!data.length){el.innerHTML='<div class="empty">Aucune donnée pour cette période</div>';return;}
+
+  const suspicious=data.filter(r=>{const cap=getCap(r.vehicule);return(r.l_aux_100&&(r.l_aux_100<3||r.l_aux_100>20))||r.litres>cap||r.km<30;});
+  const byMonth={};
+  data.forEach(r=>{
+    const d=new Date(r.created_at);
+    const k=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    if(!byMonth[k]) byMonth[k]={cost:0,conso:[],label:MONTHS[d.getMonth()]+' '+String(d.getFullYear()).slice(2)};
+    byMonth[k].cost+=r.prix_paye||0;
+    if(r.l_aux_100) byMonth[k].conso.push(r.l_aux_100);
+  });
+  const monthKeys=Object.keys(byMonth).sort().slice(-12);
+  const maxCost=Math.max(...monthKeys.map(k=>byMonth[k].cost),1);
+  const maxConso=Math.max(...monthKeys.map(k=>byMonth[k].conso.length?byMonth[k].conso.reduce((a,b)=>a+b)/byMonth[k].conso.length:0),1);
+
+  const byYear={};
+  data.forEach(r=>{const y=new Date(r.created_at).getFullYear();if(!byYear[y]) byYear[y]={cost:0,km:0,pleins:0};byYear[y].cost+=r.prix_paye||0;byYear[y].km+=r.km||0;byYear[y].pleins++;});
+
+  const byV=Object.keys(VEHICLES).map(v=>{
+    const d=data.filter(r=>r.vehicule===v);if(!d.length) return'';
+    return`<div class="stat-card"><div class="label">${getLabel(v)} — ${d.length} pleins</div><div class="value ${v}-color">${fmt(avg(d,'l_aux_100'))} <span style="font-size:1rem">L/100</span></div><div class="sub">${sum(d,'km').toFixed(0)} km · ${sum(d,'prix_paye').toFixed(2)} CHF · ${fmt(avg(d,'prix_aux_100km'))} CHF/100km</div></div>`;
+  }).join('');
+
+  let compareSection='';
+  if(filters.vehicule==='all'){
+    const ds=data.filter(r=>r.vehicule==='skoda');
+    const dm=data.filter(r=>r.vehicule==='mg');
+    if(ds.length&&dm.length){
+      compareSection=`<div class="card"><h2>🔄 Comparaison sur la période</h2><div style="overflow-x:auto"><table>
+        <thead><tr><th>Métrique</th><th>🚗 Skoda</th><th>🚗 MG 3</th></tr></thead>
+        <tbody>
+          <tr><td>Km parcourus</td><td>${sum(ds,'km').toFixed(0)}</td><td>${sum(dm,'km').toFixed(0)}</td></tr>
+          <tr><td>Total dépensé</td><td>${sum(ds,'prix_paye').toFixed(2)} CHF</td><td>${sum(dm,'prix_paye').toFixed(2)} CHF</td></tr>
+          <tr><td>Conso. moyenne</td><td>${fmt(avg(ds,'l_aux_100'))} L/100</td><td>${fmt(avg(dm,'l_aux_100'))} L/100</td></tr>
+          <tr><td>Coût / 100km</td><td>${fmt(avg(ds,'prix_aux_100km'))} CHF</td><td>${fmt(avg(dm,'prix_aux_100km'))} CHF</td></tr>
+          <tr><td>Prix moy. / litre</td><td>${fmt(avg(ds,'chf_par_litre'),3)} CHF</td><td>${fmt(avg(dm,'chf_par_litre'),3)} CHF</td></tr>
+          <tr><td>Nombre de pleins</td><td>${ds.length}</td><td>${dm.length}</td></tr>
+        </tbody>
+      </table></div></div>`;
+    }
+  }
+
+  let bwSection='';
+  if(filters.vehicule==='all') bwSection=`<div class="bw-grid">${bwCards(data,'skoda')}${bwCards(data,'mg')}</div>`;
+  else bwSection=`<div class="bw-grid">${bwCards(data,filters.vehicule)}</div>`;
+
+  const cheapest=data.reduce((a,b)=>a.chf_par_litre<b.chf_par_litre?a:b,data[0]);
+  const priciest=data.reduce((a,b)=>a.chf_par_litre>b.chf_par_litre?a:b,data[0]);
+  const costBars=monthKeys.map(k=>{const h=Math.max(4,Math.round(byMonth[k].cost/maxCost*100));return`<div class="bar-group"><div class="bar-val">${byMonth[k].cost.toFixed(0)}</div><div class="bar" style="height:${h}px;background:#4f46e5"></div><div class="bar-label">${byMonth[k].label}</div></div>`;}).join('');
+  const consoBars=monthKeys.map(k=>{const a=byMonth[k].conso.length?byMonth[k].conso.reduce((x,y)=>x+y)/byMonth[k].conso.length:0;const h=Math.max(4,Math.round(a/maxConso*100));return`<div class="bar-group"><div class="bar-val">${a?a.toFixed(1):''}</div><div class="bar" style="height:${h}px;background:#4ade80"></div><div class="bar-label">${byMonth[k].label}</div></div>`;}).join('');
+  const yearRows=Object.keys(byYear).sort((a,b)=>b-a).map(y=>`<tr><td>${y}</td><td>${byYear[y].km.toFixed(0)} km</td><td>${byYear[y].cost.toFixed(2)} CHF</td><td>${byYear[y].pleins}</td><td>${(byYear[y].cost/byYear[y].km*100).toFixed(2)} CHF/100km</td></tr>`).join('');
+  const alertBox=suspicious.length?`<div class="alert-box"><h3>⚠️ ${suspicious.length} plein${suspicious.length>1?'s':''} suspect${suspicious.length>1?'s':''}</h3>${suspicious.map(r=>{const cap=getCap(r.vehicule);const reasons=[];if(r.l_aux_100&&r.l_aux_100<3)reasons.push('conso très faible');if(r.l_aux_100&&r.l_aux_100>20)reasons.push('conso élevée ('+r.l_aux_100+' L/100)');if(r.litres>cap)reasons.push('litres > réservoir');if(r.km<30)reasons.push('km trop faibles');return`<div class="alert-item"><span>${fmtDate(r.created_at)} · ${getLabel(r.vehicule)} · ${r.km}km · ${r.litres}L</span><span class="reason">${reasons.join(', ')}</span></div>`;}).join('')}</div>`:'';
+
+  el.innerHTML=`${alertBox}
+    <div class="stats-grid-4">
+      <div class="stat-card highlight"><div class="label">Total km</div><div class="value purple">${sum(data,'km').toFixed(0)}</div><div class="sub">${data.length} pleins</div></div>
+      <div class="stat-card highlight"><div class="label">Total dépensé</div><div class="value purple">${sum(data,'prix_paye').toFixed(2)} <span style="font-size:1rem">CHF</span></div><div class="sub">${sum(data,'litres').toFixed(1)} L</div></div>
+      <div class="stat-card highlight"><div class="label">Conso. moyenne</div><div class="value purple">${fmt(avg(data,'l_aux_100'))} <span style="font-size:1rem">L/100</span></div><div class="sub">${fmt(avg(data,'prix_aux_100km'))} CHF/100km</div></div>
+      <div class="stat-card highlight"><div class="label">Prix moy. / litre</div><div class="value purple">${fmt(avg(data,'chf_par_litre'),3)} <span style="font-size:1rem">CHF</span></div><div class="sub">min ${fmt(Math.min(...data.map(r=>r.chf_par_litre)),3)} · max ${fmt(Math.max(...data.map(r=>r.chf_par_litre)),3)}</div></div>
+    </div>
+    <div class="stats-grid">${byV}</div>
+    ${compareSection}
+    ${bwSection}
+    <div class="bw-grid">
+      <div class="bw-card"><div class="bw-title">💸 Moins cher</div><div class="bw-val green">${fmt(cheapest?.chf_par_litre,3)} CHF/L</div><div class="bw-date">${cheapest?fmtDate(cheapest.created_at):''}</div></div>
+      <div class="bw-card"><div class="bw-title">💰 Plus cher</div><div class="bw-val red">${fmt(priciest?.chf_par_litre,3)} CHF/L</div><div class="bw-date">${priciest?fmtDate(priciest.created_at):''}</div></div>
+    </div>
+    <div class="card"><h2>💰 Coût mensuel (CHF)</h2><div class="chart-wrap"><div class="chart">${costBars}</div></div></div>
+    <div class="card"><h2>⛽ Consommation mensuelle (L/100)</h2><div class="chart-wrap"><div class="chart">${consoBars}</div></div></div>
+    <div class="card"><h2>📅 Par année</h2><div style="overflow-x:auto"><table><thead><tr><th>Année</th><th>Km</th><th>Coût total</th><th>Pleins</th><th>Coût/100km</th></tr></thead><tbody>${yearRows}</tbody></table></div></div>`;
+}
+
+function renderHisto(){
+  const data=histoFilter==='all'?allData:allData.filter(r=>r.vehicule===histoFilter);
+  const el=document.getElementById('histo-content');
+  if(!data.length){el.innerHTML='<div class="empty">Aucun plein</div>';return;}
+  const rows=data.map(r=>`<tr>
+    <td>${fmtDate(r.created_at)}</td>
+    <td><span class="badge ${r.vehicule}">${getLabel(r.vehicule)}</span></td>
+    <td>${r.km} km</td><td>${r.litres} L</td><td>${r.chf_par_litre} CHF</td>
+    <td>${r.l_aux_100??'—'} L/100</td><td>${r.prix_paye??'—'} CHF</td>
+    <td>${r.autonomie_theorique??'—'} km</td><td>${r.autonomie_restante??'—'} km</td>
+    <td>
+      <button class="action-btn" onclick='openEdit(${JSON.stringify(r)})' title="Modifier">✏️</button>
+      <button class="action-btn" onclick="deletePlein('${r.id}')" title="Supprimer">🗑️</button>
+    </td>
+  </tr>`).join('');
+  el.innerHTML=`<div style="overflow-x:auto"><table><thead><tr><th>Date</th><th>Véhicule</th><th>Km</th><th>Litres</th><th>CHF/L</th><th>L/100</th><th>Prix</th><th>Auto. théo.</th><th>Auto. rest.</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
+function showTab(t){
+  ['stats','historique','saisie'].forEach(id=>{document.getElementById('tab-'+id).style.display=id===t?'block':'none';});
+  document.querySelectorAll('.tab').forEach((b,i)=>{b.classList.toggle('active',['stats','historique','saisie'][i]===t);});
+  if(t!=='saisie') loadData();
+}
+
+// Aussi exécuter le trigger sur PATCH
+const origSaveEdit=saveEdit;
+
+loadData();
+</script>
+</body>
+</html>
