@@ -1,102 +1,174 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+  <link rel="icon" type="image/png" href="/favicon.ico">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Fuel Tracker">
-<meta name="theme-color" content="#f5f5f7" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0f0f13" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#0f0f13">
 <title>Fuel Tracker</title>
 <style>
-  :root{--bg:#f5f5f7;--bg2:#fff;--border:#e0e0e8;--border2:#ebebf0;--text:#1a1a2e;--text2:#555566;--text3:#999aaa;--tab-active-bg:#e8e8f0;--tab-active-color:#1a1a2e;--input-bg:#f0f0f5;--preview-bg:#f0f0f5;--row-hover:#f8f8fc;--highlight-bg:#eeeeff;--highlight-border:#c8c8ff;--alert-bg:#fff8ee;--alert-border:#f59e0b60;--modal-bg:#fff;}
-  @media(prefers-color-scheme:dark){:root{--bg:#0f0f13;--bg2:#1a1a24;--border:#2a2a3a;--border2:#1a1a24;--text:#e0e0e0;--text2:#aaa;--text3:#666677;--tab-active-bg:#2a2a3a;--tab-active-color:#fff;--input-bg:#0f0f13;--preview-bg:#0f0f13;--row-hover:#1a1a2480;--highlight-bg:#4f46e510;--highlight-border:#4f46e540;--alert-bg:#2d1a0a;--alert-border:#f59e0b40;--modal-bg:#1a1a24;}}
-  *{box-sizing:border-box;margin:0;padding:0;}
-  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:env(safe-area-inset-bottom);}
-  header{background:var(--bg2);border-bottom:1px solid var(--border);padding:16px 24px;padding-top:calc(16px + env(safe-area-inset-top));display:flex;align-items:center;gap:12px;}
-  header h1{font-size:1.2rem;font-weight:600;}
-  .tab-bar{display:flex;gap:4px;margin-left:auto;}
-  .tab{padding:8px 12px;border-radius:8px;cursor:pointer;font-size:0.82rem;background:transparent;color:var(--text3);border:none;transition:all 0.2s;}
-  .tab.active{background:var(--tab-active-bg);color:var(--tab-active-color);}
-  .container{max-width:960px;margin:0 auto;padding:24px 16px;}
-  .card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px;}
-  .card h2{font-size:0.9rem;font-weight:600;margin-bottom:16px;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;}
-  .vehicle-toggle{display:flex;gap:8px;margin-bottom:20px;}
-  .v-btn{flex:1;padding:12px;border-radius:8px;border:2px solid var(--border);background:transparent;color:var(--text3);cursor:pointer;font-size:0.9rem;transition:all 0.2s;}
-  .v-btn.active.skoda{border-color:#4ade80;color:#16a34a;background:#4ade8015;}
-  @media(prefers-color-scheme:dark){.v-btn.active.skoda{color:#4ade80;}}
-  .v-btn.active.mg{border-color:#f97316;color:#ea6e00;background:#f9731615;}
-  @media(prefers-color-scheme:dark){.v-btn.active.mg{color:#f97316;}}
-  .fields{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px;}
-  .field label{display:block;font-size:0.78rem;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;}
-  .field input{width:100%;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:1rem;outline:none;transition:border-color 0.2s;}
-  .field input:focus{border-color:#4f46e5;}
-  .preview{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px;background:var(--preview-bg);border-radius:8px;padding:16px;}
-  .prev-item{text-align:center;}
-  .prev-item .val{font-size:1.1rem;font-weight:600;}
-  .prev-item .lbl{font-size:0.72rem;color:var(--text3);margin-top:2px;}
-  .submit-btn{width:100%;padding:14px;border-radius:8px;border:none;background:#4f46e5;color:#fff;font-size:1rem;font-weight:600;cursor:pointer;}
-  .submit-btn:disabled{background:var(--border);color:var(--text3);cursor:not-allowed;}
-  .warn-box{background:#fff8ee;border:1px solid #f59e0b60;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:0.85rem;color:#b45309;}
-  @media(prefers-color-scheme:dark){.warn-box{background:#2d1a0a;color:#fbbf24;}}
-  .msg{text-align:center;padding:10px;border-radius:8px;margin-top:12px;font-size:0.9rem;}
-  .msg.success{background:#0d2d1a;color:#34d399;}
-  .msg.error{background:#2d0d0d;color:#f87171;}
-  .filter-bar{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;align-items:center;}
-  .filter-btn{padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text3);cursor:pointer;font-size:0.82rem;transition:all 0.2s;}
-  .filter-btn.active{background:var(--tab-active-bg);color:var(--tab-active-color);}
-  .filter-select{background:var(--bg2);border:1px solid var(--border);border-radius:20px;color:var(--text2);padding:6px 14px;font-size:0.82rem;outline:none;cursor:pointer;}
-  .export-btn{margin-left:auto;padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;font-size:0.82rem;}
-  .stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px;}
-  .stats-grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
-  .stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px;}
-  .stat-card .label{font-size:0.75rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;}
-  .stat-card .value{font-size:1.5rem;font-weight:700;}
-  .stat-card .sub{font-size:0.78rem;color:var(--text3);margin-top:4px;}
-  .stat-card.highlight{border-color:var(--highlight-border);background:var(--highlight-bg);}
-  .skoda-color{color:#16a34a;} @media(prefers-color-scheme:dark){.skoda-color{color:#4ade80;}}
-  .mg-color{color:#ea6e00;} @media(prefers-color-scheme:dark){.mg-color{color:#f97316;}}
-  .green{color:#16a34a;} @media(prefers-color-scheme:dark){.green{color:#34d399;}}
-  .red{color:#dc2626;} @media(prefers-color-scheme:dark){.red{color:#f87171;}}
-  .purple{color:#7c3aed;} @media(prefers-color-scheme:dark){.purple{color:#a78bfa;}}
-  .chart-wrap{overflow-x:auto;padding-bottom:8px;}
-  .chart{display:flex;align-items:flex-end;gap:4px;height:150px;min-width:400px;padding-top:30px;}
-  .bar-group{display:flex;flex-direction:column;align-items:center;flex:1;min-width:32px;}
-  .bar{width:100%;border-radius:4px 4px 0 0;min-height:2px;}
-  .bar:hover{opacity:0.8;}
-  .bar-label{font-size:0.62rem;color:var(--text3);margin-top:4px;text-align:center;white-space:nowrap;}
-  .bar-val{font-size:0.65rem;color:var(--text2);margin-bottom:2px;}
-  .bw-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;}
-  .bw-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px;}
-  .bw-card .bw-title{font-size:0.75rem;color:var(--text3);text-transform:uppercase;margin-bottom:10px;}
-  .bw-card .bw-val{font-size:1.3rem;font-weight:700;margin-bottom:4px;}
-  .bw-card .bw-date{font-size:0.78rem;color:var(--text3);}
-  .alert-box{background:var(--alert-bg);border:1px solid var(--alert-border);border-radius:12px;padding:16px;margin-bottom:20px;}
-  .alert-box h3{font-size:0.85rem;color:#f59e0b;margin-bottom:10px;}
-  .alert-item{font-size:0.82rem;color:var(--text);padding:6px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px;}
-  .alert-item:last-child{border-bottom:none;}
-  .alert-item .reason{color:#f59e0b;font-size:0.75rem;}
-  table{width:100%;border-collapse:collapse;font-size:0.85rem;}
-  th{text-align:left;padding:10px 12px;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);font-size:0.75rem;text-transform:uppercase;}
-  td{padding:8px 12px;border-bottom:1px solid var(--border2);color:var(--text);}
-  tr:hover td{background:var(--row-hover);}
-  .badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:0.75rem;font-weight:600;}
-  .badge.skoda{background:#4ade8020;color:#16a34a;} @media(prefers-color-scheme:dark){.badge.skoda{color:#4ade80;}}
-  .badge.mg{background:#f9731620;color:#ea6e00;} @media(prefers-color-scheme:dark){.badge.mg{color:#f97316;}}
-  .loading{text-align:center;padding:40px;color:var(--text3);}
-  .empty{text-align:center;padding:40px;color:var(--text3);font-size:0.9rem;}
-  .action-btn{background:none;border:none;cursor:pointer;font-size:0.95rem;opacity:0.4;padding:2px 4px;transition:opacity 0.2s;}
-  .action-btn:hover{opacity:1;}
-  .modal-overlay{display:none;position:fixed;inset:0;background:#00000060;z-index:100;align-items:center;justify-content:center;padding:16px;}
-  .modal-overlay.open{display:flex;}
-  .modal{background:var(--modal-bg);border-radius:16px;padding:24px;width:100%;max-width:420px;border:1px solid var(--border);}
-  .modal h3{font-size:1rem;font-weight:600;margin-bottom:20px;}
-  .modal-btns{display:flex;gap:8px;margin-top:20px;}
-  .modal-btns button{flex:1;padding:12px;border-radius:8px;border:none;cursor:pointer;font-size:0.95rem;font-weight:600;}
-  .btn-cancel{background:var(--border);color:var(--text2);}
-  .btn-save{background:#4f46e5;color:#fff;}
-  @media(max-width:600px){.fields{grid-template-columns:1fr 1fr;}.stats-grid{grid-template-columns:1fr 1fr;}.stats-grid-4{grid-template-columns:1fr 1fr;}.bw-grid{grid-template-columns:1fr 1fr;}}
+  :root {
+    --bg: #f5f5f7; --bg2: #ffffff; --border: #e0e0e8; --border2: #ebebf0;
+    --text: #1a1a2e; --text2: #555566; --text3: #999aaa;
+    --tab-active-bg: #e8e8f0; --tab-active-color: #1a1a2e;
+    --input-bg: #f0f0f5; --preview-bg: #f0f0f5;
+    --row-hover: #f8f8fc; --highlight-bg: #eeeeff; --highlight-border: #c8c8ff;
+    --alert-bg: #fff8ee; --alert-border: #f59e0b60;
+    --warn-bg: #fffbeb; --warn-border: #fde68a;
+    --modal-overlay: rgba(0,0,0,0.35);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme]) {
+      --bg: #0f0f13; --bg2: #1a1a24; --border: #2a2a3a; --border2: #1a1a2480;
+      --text: #e0e0e0; --text2: #aaaaaa; --text3: #666677;
+      --tab-active-bg: #2a2a3a; --tab-active-color: #ffffff;
+      --input-bg: #0f0f13; --preview-bg: #0f0f13;
+      --row-hover: #1a1a2480; --highlight-bg: #4f46e510; --highlight-border: #4f46e540;
+      --alert-bg: #2d1a0a; --alert-border: #f59e0b40;
+      --warn-bg: #1a1500; --warn-border: #a37c0040;
+      --modal-overlay: rgba(0,0,0,0.65);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f0f13; --bg2: #1a1a24; --border: #2a2a3a; --border2: #1a1a2480;
+    --text: #e0e0e0; --text2: #aaaaaa; --text3: #666677;
+    --tab-active-bg: #2a2a3a; --tab-active-color: #ffffff;
+    --input-bg: #0f0f13; --preview-bg: #0f0f13;
+    --row-hover: #1a1a2480; --highlight-bg: #4f46e510; --highlight-border: #4f46e540;
+    --alert-bg: #2d1a0a; --alert-border: #f59e0b40;
+    --warn-bg: #1a1500; --warn-border: #a37c0040;
+    --modal-overlay: rgba(0,0,0,0.65);
+  }
+  :root[data-theme="light"] {
+    --bg: #f5f5f7; --bg2: #ffffff; --border: #e0e0e8; --border2: #ebebf0;
+    --text: #1a1a2e; --text2: #555566; --text3: #999aaa;
+    --tab-active-bg: #e8e8f0; --tab-active-color: #1a1a2e;
+    --input-bg: #f0f0f5; --preview-bg: #f0f0f5;
+    --row-hover: #f8f8fc; --highlight-bg: #eeeeff; --highlight-border: #c8c8ff;
+    --alert-bg: #fff8ee; --alert-border: #f59e0b60;
+    --warn-bg: #fffbeb; --warn-border: #fde68a;
+    --modal-overlay: rgba(0,0,0,0.35);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: env(safe-area-inset-bottom); }
+  header { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 16px 24px; padding-top: calc(16px + env(safe-area-inset-top)); display: flex; align-items: center; gap: 12px; }
+  header h1 { font-size: 1.2rem; font-weight: 600; }
+  .tab-bar { display: flex; gap: 4px; margin-left: auto; flex-wrap: wrap; }
+  .tab { padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 0.82rem; background: transparent; color: var(--text3); border: none; transition: all 0.2s; }
+  .tab.active { background: var(--tab-active-bg); color: var(--tab-active-color); }
+  .container { max-width: 960px; margin: 0 auto; padding: 24px 16px; }
+  .card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+  .card h2 { font-size: 0.9rem; font-weight: 600; margin-bottom: 16px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.05em; }
+  .vehicle-toggle { display: flex; gap: 8px; margin-bottom: 20px; }
+  .v-btn { flex: 1; padding: 12px; border-radius: 8px; border: 2px solid var(--border); background: transparent; color: var(--text3); cursor: pointer; font-size: 0.95rem; transition: all 0.2s; }
+  .v-btn.active.moto { border-color: #f59e0b; color: #f59e0b; background: #f59e0b15; }
+  .v-btn.active.voiture { border-color: #3b82f6; color: #3b82f6; background: #3b82f615; }
+  .fields { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+  .field label { display: block; font-size: 0.78rem; color: var(--text2); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .field input { width: 100%; background: var(--input-bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: var(--text); font-size: 1rem; outline: none; transition: border-color 0.2s; }
+  .field input:focus { border-color: #4f46e5; }
+  .field input.warn { border-color: #f59e0b; }
+  .field input.error-field { border-color: #ef4444; }
+  .preview { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 20px; background: var(--preview-bg); border-radius: 8px; padding: 16px; }
+  .prev-item { text-align: center; }
+  .prev-item .val { font-size: 1.1rem; font-weight: 600; color: var(--text); }
+  .prev-item .lbl { font-size: 0.72rem; color: var(--text3); margin-top: 2px; }
+  .km-warning { display: none; background: var(--warn-bg); border: 1px solid var(--warn-border); border-radius: 8px; padding: 10px 14px; margin-bottom: 12px; font-size: 0.83rem; color: #b45309; gap: 8px; align-items: flex-start; }
+  @media (prefers-color-scheme: dark) { .km-warning { color: #fbbf24; } }
+  .km-warning.visible { display: flex; }
+  .submit-btn { width: 100%; padding: 14px; border-radius: 8px; border: none; background: #4f46e5; color: #fff; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+  .submit-btn:hover:not(:disabled) { background: #4338ca; }
+  .submit-btn:disabled { background: var(--border); color: var(--text3); cursor: not-allowed; }
+  .msg { text-align: center; padding: 10px; border-radius: 8px; margin-top: 12px; font-size: 0.9rem; }
+  .msg.success { background: #0d2d1a; color: #34d399; }
+  .msg.error { background: #2d0d0d; color: #f87171; }
+  .filter-bar { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+  .filter-btn { padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border); background: transparent; color: var(--text3); cursor: pointer; font-size: 0.82rem; transition: all 0.2s; }
+  .filter-btn.active { background: var(--tab-active-bg); color: var(--tab-active-color); border-color: var(--border); }
+  .filter-select { background: var(--bg2); border: 1px solid var(--border); border-radius: 20px; color: var(--text2); padding: 6px 14px; font-size: 0.82rem; outline: none; cursor: pointer; }
+  .export-btn { margin-left: auto; padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border); background: transparent; color: var(--text2); cursor: pointer; font-size: 0.82rem; transition: all 0.2s; display: flex; align-items: center; gap: 5px; }
+  .export-btn:hover { background: var(--tab-active-bg); }
+  .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px; }
+  .stats-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+  .stat-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
+  .stat-card .label { font-size: 0.75rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+  .stat-card .value { font-size: 1.5rem; font-weight: 700; }
+  .stat-card .sub { font-size: 0.78rem; color: var(--text3); margin-top: 4px; }
+  .stat-card.highlight { border-color: var(--highlight-border); background: var(--highlight-bg); }
+  .moto-color { color: #f59e0b; }
+  .voiture-color { color: #3b82f6; }
+  .green { color: #16a34a; }
+  @media (prefers-color-scheme: dark) { .green { color: #34d399; } }
+  .red { color: #dc2626; }
+  @media (prefers-color-scheme: dark) { .red { color: #f87171; } }
+  .purple { color: #7c3aed; }
+  @media (prefers-color-scheme: dark) { .purple { color: #a78bfa; } }
+  .chart-wrap { overflow-x: auto; padding-bottom: 8px; }
+  .chart { display: flex; align-items: flex-end; gap: 4px; height: 150px; min-width: 400px; padding-top: 30px; }
+  .bar-group { display: flex; flex-direction: column; align-items: center; flex: 1; min-width: 32px; }
+  .bar { width: 100%; border-radius: 4px 4px 0 0; transition: opacity 0.2s; cursor: pointer; min-height: 2px; }
+  .bar:hover { opacity: 0.8; }
+  .bar-label { font-size: 0.62rem; color: var(--text3); margin-top: 4px; text-align: center; white-space: nowrap; }
+  .bar-val { font-size: 0.65rem; color: var(--text2); margin-bottom: 2px; }
+  .bw-section { margin-bottom: 20px; }
+  .bw-section-title { font-size: 0.75rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; font-weight: 600; }
+  .bw-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .bw-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+  .bw-card .bw-title { font-size: 0.75rem; color: var(--text3); text-transform: uppercase; margin-bottom: 10px; }
+  .bw-card .bw-val { font-size: 1.3rem; font-weight: 700; margin-bottom: 4px; }
+  .bw-card .bw-date { font-size: 0.78rem; color: var(--text3); }
+  .bw-card .bw-vehicle { font-size: 0.72rem; font-weight: 600; margin-bottom: 6px; }
+  .alert-box { background: var(--alert-bg); border: 1px solid var(--alert-border); border-radius: 12px; padding: 16px; margin-bottom: 20px; }
+  .alert-box h3 { font-size: 0.85rem; color: #f59e0b; margin-bottom: 10px; }
+  .alert-item { font-size: 0.82rem; color: var(--text); padding: 6px 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px; align-items: center; }
+  .alert-item:last-child { border-bottom: none; }
+  .alert-item .reason { color: #f59e0b; font-size: 0.75rem; }
+  .import-zone { border: 2px dashed var(--border); border-radius: 10px; padding: 24px; text-align: center; cursor: pointer; transition: all 0.2s; margin-bottom: 16px; }
+  .import-zone:hover { border-color: #4f46e5; background: #4f46e510; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  th { text-align: left; padding: 10px 12px; color: var(--text3); font-weight: 500; border-bottom: 1px solid var(--border); font-size: 0.75rem; text-transform: uppercase; }
+  td { padding: 10px 12px; border-bottom: 1px solid var(--border2); color: var(--text); }
+  tr:hover td { background: var(--row-hover); }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+  .badge.moto { background: #f59e0b20; color: #f59e0b; }
+  .badge.voiture { background: #3b82f620; color: #3b82f6; }
+  .action-btn { background: none; border: none; cursor: pointer; font-size: 1rem; opacity: 0.45; padding: 2px 4px; transition: opacity 0.15s; border-radius: 4px; }
+  .action-btn:hover { opacity: 1; }
+  .loading { text-align: center; padding: 40px; color: var(--text3); }
+  .empty { text-align: center; padding: 40px; color: var(--text3); font-size: 0.9rem; }
+  .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+  .compare-col { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
+  .compare-col h3 { font-size: 0.9rem; font-weight: 700; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+  .compare-row { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid var(--border2); font-size: 0.83rem; }
+  .compare-row:last-child { border-bottom: none; }
+  .compare-row .lbl { color: var(--text3); }
+  .compare-row .val { font-weight: 600; }
+
+  /* Modal */
+  .modal-overlay { position: fixed; inset: 0; background: var(--modal-overlay); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--bg2); border: 1px solid var(--border); border-radius: 16px; padding: 24px; width: 100%; max-width: 480px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+  .modal h2 { font-size: 1rem; font-weight: 700; margin-bottom: 20px; }
+  .modal .fields { grid-template-columns: 1fr 1fr; }
+  .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+  .modal-actions button { flex: 1; padding: 12px; border-radius: 8px; border: none; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+  .btn-cancel { background: var(--input-bg); color: var(--text2); }
+  .btn-cancel:hover { background: var(--border); }
+  .btn-save { background: #4f46e5; color: #fff; }
+  .btn-save:hover { background: #4338ca; }
+  .modal-msg { font-size: 0.82rem; margin-top: 10px; text-align: center; min-height: 20px; }
+
+  @media (max-width: 600px) {
+    .fields { grid-template-columns: 1fr 1fr; }
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+    .stats-grid-4 { grid-template-columns: 1fr 1fr; }
+    .bw-grid { grid-template-columns: 1fr 1fr; }
+    .compare-grid { grid-template-columns: 1fr; }
+  }
 </style>
 </head>
 <body>
@@ -107,37 +179,41 @@
     <button class="tab active" onclick="showTab('stats')">Stats</button>
     <button class="tab" onclick="showTab('historique')">Historique</button>
     <button class="tab" onclick="showTab('saisie')">Saisie</button>
+    <button class="tab" onclick="showTab('import')">Import</button>
   </div>
+  <button id="theme-btn" onclick="toggleTheme()" style="margin-left:8px;background:none;border:1px solid var(--border);border-radius:8px;padding:7px 10px;cursor:pointer;font-size:1rem;color:var(--text2);transition:all 0.2s" title="Changer le thème">🌙</button>
 </header>
 
-<div class="modal-overlay" id="edit-modal">
+<!-- Edit Modal -->
+<div class="modal-overlay" id="edit-modal" onclick="closeModal(event)">
   <div class="modal">
-    <h3>✏️ Modifier le plein</h3>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-      <div class="field"><label>Km</label><input type="number" id="edit-km" step="0.1"></div>
-      <div class="field"><label>Litres</label><input type="number" id="edit-litres" step="0.01"></div>
-      <div class="field"><label>CHF/L</label><input type="number" id="edit-chf" step="0.001"></div>
-      <div class="field"><label>Véhicule</label>
-        <select id="edit-vehicule" style="width:100%;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:1rem;outline:none;">
-          <option value="skoda">🚗 Skoda Octavia</option>
-          <option value="mg">🚗 MG 3</option>
-        </select>
-      </div>
+    <h2>✏️ Modifier le plein</h2>
+    <div class="vehicle-toggle" id="edit-toggle">
+      <!-- généré dynamiquement par initVehicleButtons() -->
     </div>
-    <div class="modal-btns">
-      <button class="btn-cancel" onclick="closeModal()">Annuler</button>
-      <button class="btn-save" onclick="saveEdit()">Enregistrer</button>
+    <div class="fields" style="grid-template-columns:1fr 1fr">
+      <div class="field"><label>Km depuis dernier plein</label><input type="number" id="edit-km" step="0.1" placeholder="ex: 120"></div>
+      <div class="field"><label>Litres</label><input type="number" id="edit-litres" step="0.01" placeholder="ex: 5.5"></div>
+      <div class="field"><label>CHF/litre</label><input type="number" id="edit-chf" step="0.001" placeholder="ex: 1.65"></div>
+      <div class="field"><label>Date</label><input type="date" id="edit-date"></div>
     </div>
     <input type="hidden" id="edit-id">
+    <input type="hidden" id="edit-vehicule-val" value="moto">
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="document.getElementById('edit-modal').classList.remove('open')">Annuler</button>
+      <button class="btn-save" onclick="saveEdit()">Enregistrer</button>
+    </div>
+    <div class="modal-msg" id="edit-msg"></div>
   </div>
 </div>
 
 <div class="container">
+
   <div id="tab-stats">
     <div class="filter-bar">
       <button class="filter-btn active" onclick="setVFilter('all',this)">Tout</button>
-      <button class="filter-btn" onclick="setVFilter('skoda',this)">🚗 Skoda</button>
-      <button class="filter-btn" onclick="setVFilter('mg',this)">🚗 MG 3</button>
+      <button class="filter-btn" onclick="setVFilter('skoda_octavia',this)">🚗 Skoda</button>
+      <button class="filter-btn" onclick="setVFilter('mg3',this)">🚙 MG3</button>
       <select class="filter-select" id="filter-year" onchange="setYearFilter(this.value)"><option value="all">Toutes les années</option></select>
       <select class="filter-select" id="filter-month" onchange="setMonthFilter(this.value)"><option value="all">Tous les mois</option></select>
     </div>
@@ -147,8 +223,8 @@
   <div id="tab-historique" style="display:none">
     <div class="filter-bar">
       <button class="filter-btn active" onclick="setHistoFilter('all',this)">Tout</button>
-      <button class="filter-btn" onclick="setHistoFilter('skoda',this)">🚗 Skoda</button>
-      <button class="filter-btn" onclick="setHistoFilter('mg',this)">🚗 MG 3</button>
+      <button class="filter-btn" onclick="setHistoFilter('skoda_octavia',this)">🚗 Skoda</button>
+      <button class="filter-btn" onclick="setHistoFilter('mg3',this)">🚙 MG3</button>
       <button class="export-btn" onclick="exportCSV()">⬇️ Export CSV</button>
     </div>
     <div class="card" style="padding:0;overflow:hidden">
@@ -159,66 +235,180 @@
   <div id="tab-saisie" style="display:none">
     <div class="card">
       <h2>Nouveau plein</h2>
-      <div class="vehicle-toggle">
-        <button class="v-btn active skoda" id="btn-skoda" onclick="selectVehicule('skoda')">🚗 Skoda Octavia</button>
-        <button class="v-btn" id="btn-mg" onclick="selectVehicule('mg')">🚗 MG 3</button>
+      <div class="vehicle-toggle" id="saisie-toggle">
+        <!-- généré dynamiquement par initVehicleButtons() -->
       </div>
       <div class="fields">
-        <div class="field"><label>Km depuis dernier plein</label><input type="number" id="km" placeholder="ex: 500" oninput="updatePreview()" step="0.1"></div>
-        <div class="field"><label>Nombre de litres</label><input type="number" id="litres" placeholder="ex: 35" oninput="updatePreview()" step="0.01"></div>
+        <div class="field"><label>Km depuis dernier plein</label><input type="number" id="km" placeholder="ex: 120" oninput="updatePreview()" step="0.1"></div>
+        <div class="field"><label>Nombre de litres</label><input type="number" id="litres" placeholder="ex: 5.5" oninput="updatePreview()" step="0.01"></div>
         <div class="field"><label>Prix / litre (CHF)</label><input type="number" id="chf" placeholder="ex: 1.65" oninput="updatePreview()" step="0.001"></div>
       </div>
-      <div id="saisie-warn" style="display:none" class="warn-box"></div>
+      <div class="km-warning" id="km-warning">
+        <span>⚠️</span><span id="km-warning-text"></span>
+      </div>
       <div class="preview">
         <div class="prev-item"><div class="val" id="prev-conso">—</div><div class="lbl">L/100km</div></div>
         <div class="prev-item"><div class="val" id="prev-prix">—</div><div class="lbl">Prix payé (CHF)</div></div>
         <div class="prev-item"><div class="val" id="prev-p100">—</div><div class="lbl">CHF/100km</div></div>
         <div class="prev-item"><div class="val" id="prev-auto-th">—</div><div class="lbl">Autonomie théo. (km)</div></div>
         <div class="prev-item"><div class="val" id="prev-auto-re">—</div><div class="lbl">Autonomie restante (km)</div></div>
-        <div class="prev-item"><div class="val" id="prev-vehicule">🚗</div><div class="lbl">Véhicule</div></div>
+        <div class="prev-item"><div class="val" id="prev-vehicule">🏍️</div><div class="lbl">Véhicule</div></div>
       </div>
       <button class="submit-btn" id="submit-btn" onclick="submitPlein()">Enregistrer le plein</button>
       <div id="msg"></div>
     </div>
   </div>
+
+  <div id="tab-import" style="display:none">
+    <div class="card">
+      <h2>📥 Import depuis Notion</h2>
+      <details style="margin-bottom:20px;border:1px solid var(--border);border-radius:10px;padding:16px">
+        <summary style="cursor:pointer;font-size:0.88rem;font-weight:600;color:var(--text2)">🔧 Migration SQL — changer de véhicule</summary>
+        <div style="margin-top:14px;font-size:0.83rem;color:var(--text2);line-height:1.6">
+          <p style="margin-bottom:10px">Lorsque tu changes de véhicule, lance ces requêtes dans <strong>Supabase → SQL Editor</strong> pour migrer les anciennes données vers le nouvel ID, puis mets à jour la config VEHICLES dans le code.</p>
+          <p style="margin-bottom:6px;color:var(--text3);font-size:0.78rem;text-transform:uppercase;letter-spacing:.05em">Migration initiale (à faire une seule fois)</p>
+          <pre style="background:var(--input-bg);border-radius:8px;padding:12px;overflow-x:auto;font-size:0.8rem;margin-bottom:12px">-- Renommer les anciens IDs génériques vers les IDs précis
+UPDATE pleins SET vehicule = 'skoda_octavia' WHERE vehicule = 'voiture';
+UPDATE pleins SET vehicule = 'mg3'           WHERE vehicule = 'moto';</pre>
+          <p style="margin-bottom:6px;color:var(--text3);font-size:0.78rem;text-transform:uppercase;letter-spacing:.05em">Lors d'un changement futur (ex: Low Rider → nouvelle moto)</p>
+          <pre style="background:var(--input-bg);border-radius:8px;padding:12px;overflow-x:auto;font-size:0.8rem;margin-bottom:8px">-- NE PAS lancer — exemple uniquement, adapter les IDs
+-- Les pleins de 'low_rider' restent intacts dans l'historique.
+-- Ajouter le nouveau véhicule dans VEHICLES{} avec actif:true,
+-- et passer low_rider à actif:false.</pre>
+          <p style="color:#f59e0b;font-size:0.78rem">⚠️ Toujours faire un Export CSV depuis l'onglet Historique avant de lancer une migration SQL.</p>
+        </div>
+      </details>
+      <p style="color:#888;font-size:0.88rem;margin-bottom:20px">Les doublons exacts seront automatiquement ignorés grâce à la contrainte d'unicité.</p>
+      <div class="import-zone" onclick="document.getElementById('file-input').click()" ondragover="event.preventDefault()" ondrop="event.preventDefault();handleFiles(event.dataTransfer.files)">
+        <div style="font-size:2rem">📂</div>
+        <p style="color:#666;margin-top:8px">Clique ou glisse tes fichiers CSV ici</p>
+      </div>
+      <input type="file" id="file-input" accept=".csv" multiple onchange="handleFiles(this.files)" style="display:none">
+      <div id="import-preview" style="display:none;background:var(--preview-bg);border-radius:8px;padding:16px;margin-bottom:16px;font-size:0.85rem"></div>
+      <button id="import-btn" onclick="doImport()" style="display:none;width:100%;padding:14px;border-radius:8px;border:none;background:#059669;color:#fff;font-size:1rem;font-weight:600;cursor:pointer"></button>
+      <div id="import-progress" style="display:none;margin-top:12px">
+        <div id="progress-text" style="font-size:0.82rem;color:#666"></div>
+        <div style="height:6px;background:#2a2a3a;border-radius:3px;overflow:hidden;margin-top:6px"><div id="progress-fill" style="height:100%;background:#059669;border-radius:3px;width:0%;transition:width 0.3s"></div></div>
+      </div>
+      <div id="import-msg" style="margin-top:12px"></div>
+    </div>
+  </div>
+
 </div>
-
 <script>
-const SUPABASE_URL='https://sgmsgcclwyvzxdeucdba.supabase.co';
-const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNnbXNnY2Nsd3l2enhkZXVjZGJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4MjY5NTgsImV4cCI6MjA5NjQwMjk1OH0.r87yMr3IfWoxj_La5_326kEjJpN2aa9BbiRTYIxhXD8';
-const VEHICLES={skoda:{label:'Skoda Octavia',cap:55},mg:{label:'MG 3',cap:36}};
-const MONTHS=['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
-let vehicule='skoda',allData=[],histoFilter='all';
-let filters={vehicule:'all',year:'all',month:'all'};
+const SUPABASE_URL='https://xusfllssepnengiusigk.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1c2ZsbHNzZXBuZW5naXVzaWdrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzMjAzMDMsImV4cCI6MjA5NTg5NjMwM30.btp-bMfnRFcBNwi1lsszRub1IRiXveUXHcQ1O4t5wTw';
+// ═══════════════════════════════════════════════════════════════════
+// CONFIGURATION VÉHICULES
+//
+// Chaque entrée = un véhicule physique distinct.
+// • id       : clé stockée en DB — immuable, jamais modifier après migration
+// • categorie: 'moto' ou 'voiture' — sert aux filtres et regroupements
+// • label    : nom affiché dans toute l'interface
+//
+// CHANGER DE VÉHICULE → ajouter une nouvelle entrée ici, lancer la
+// requête SQL de migration dans Supabase (voir README dans l'onglet Import),
+// ne JAMAIS modifier l'id d'une entrée existante.
+// ═══════════════════════════════════════════════════════════════════
+const VEHICLES = {
+  skoda_octavia: {
+    id: 'skoda_octavia',
+    categorie: 'voiture',
+    label: 'Skoda Octavia',
+    emoji: '🚗',
+    color: '#3b82f6',
+    reservoir: 55,
+    conso: { min: 4, max: 15 },
+    actif: true,
+  },
+  mg3: {
+    id: 'mg3',
+    categorie: 'voiture',
+    label: 'MG3',
+    emoji: '🚙',
+    color: '#10b981',
+    reservoir: 36,
+    conso: { min: 4, max: 15 },
+    actif: true,
+  },
+};
 
-function api(path,opts={}){
-  return fetch(SUPABASE_URL+'/rest/v1/'+path,{...opts,headers:{
-    'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json',
-    ...(opts.method==='POST'?{'Prefer':'return=minimal'}:{}),
-    ...(opts.method==='PATCH'?{'Prefer':'return=minimal'}:{}),
-    ...opts.headers
-  }});
+// Tous les IDs (y compris inactifs — pour lire l'historique)
+const V_IDS       = Object.keys(VEHICLES);
+// IDs actifs seulement — pour la saisie
+const V_IDS_ACTIF = V_IDS.filter(id => VEHICLES[id].actif);
+
+function vLabel(id)      { return VEHICLES[id]?.label     ?? id; }
+function vEmoji(id)      { return VEHICLES[id]?.emoji     ?? '🚗'; }
+function vColor(id)      { return VEHICLES[id]?.color     ?? '#888'; }
+function vReservoir(id)  { return VEHICLES[id]?.reservoir ?? 50; }
+function vConsoLimits(id){ return VEHICLES[id]?.conso     ?? {min:2,max:25}; }
+function vCategorie(id)  { return VEHICLES[id]?.categorie ?? 'autre'; }
+
+// Filtre par catégorie (pour les boutons Tout/Moto/Voiture)
+function vMatchCategorie(id, cat) {
+  if(cat === 'all') return true;
+  return vCategorie(id) === cat;
 }
 
-function getLabel(v){return VEHICLES[v]?.label??v;}
-function getCap(v){return VEHICLES[v]?.cap??50;}
-function getEmoji(v){return '🚗';}
+const MONTHS=['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+let vehicule=V_IDS_ACTIF[0]??'harley_48', allData=[], histoFilter='all', pendingRows=[];
+let filters={vehicule:'all', categorie:'all', year:'all', month:'all'};
 
-function selectVehicule(v){
+function api(path,opts={}) {
+  const headers={'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json',...(opts.method&&opts.method!=='GET'?{'Prefer':'return=minimal'}:{})};
+  if(opts.headers) Object.assign(headers,opts.headers);
+  return fetch(SUPABASE_URL+'/rest/v1/'+path,{...opts,headers});
+}
+
+// ─── VEHICLE SELECT ───────────────────────────────────────────────
+function selectVehicule(v) {
   vehicule=v;
-  Object.keys(VEHICLES).forEach(k=>{
-    const btn=document.getElementById('btn-'+k);
-    if(btn) btn.className='v-btn'+(k===v?' active '+k:'');
+  V_IDS_ACTIF.forEach(id=>{
+    document.getElementById('btn-'+id).className='v-btn'+(v===id?' active '+vCategorie(id):'');
   });
-  document.getElementById('prev-vehicule').textContent=getLabel(v);
+  document.getElementById('prev-vehicule').textContent=vEmoji(v);
   updatePreview();
 }
 
-function updatePreview(){
+// ─── KM VALIDATION ────────────────────────────────────────────────
+function getLastKmForVehicle(v) {
+  const entries = allData.filter(r=>r.vehicule===v);
+  if(!entries.length) return null;
+  // allData is sorted desc, so first entry is most recent
+  return entries[0].km;
+}
+
+function checkKmWarning(kmVal, v) {
+  const warn = document.getElementById('km-warning');
+  const txt = document.getElementById('km-warning-text');
+  const input = document.getElementById('km');
+  if(!kmVal || kmVal <= 0) { warn.classList.remove('visible'); input.classList.remove('warn','error-field'); return; }
+  const limits = vConsoLimits(v);
+  if(kmVal < 20) {
+    txt.textContent = `Seulement ${kmVal} km depuis le dernier plein — c'est très peu, vérifie.`;
+    warn.classList.add('visible'); input.classList.add('warn'); return;
+  }
+  const l = parseFloat(document.getElementById('litres').value);
+  if(l && l > 0) {
+    const conso = l/kmVal*100;
+    if(conso < limits.min) {
+      txt.textContent = `Conso calculée : ${conso.toFixed(1)} L/100 — semble trop faible pour ${vLabel(v)}.`;
+      warn.classList.add('visible'); input.classList.add('warn'); return;
+    }
+    if(conso > limits.max) {
+      txt.textContent = `Conso calculée : ${conso.toFixed(1)} L/100 — semble anormalement élevée pour ${vLabel(v)}.`;
+      warn.classList.add('visible'); input.classList.add('warn'); return;
+    }
+  }
+  warn.classList.remove('visible'); input.classList.remove('warn','error-field');
+}
+
+function updatePreview() {
   const km=parseFloat(document.getElementById('km').value);
   const l=parseFloat(document.getElementById('litres').value);
   const chf=parseFloat(document.getElementById('chf').value);
-  const cap=getCap(vehicule);
+  const cap=vReservoir(vehicule);
   const conso=(km&&l)?l/km*100:null;
   const prix=(l&&chf)?l*chf:null;
   document.getElementById('prev-conso').textContent=conso?conso.toFixed(2):'—';
@@ -226,96 +416,245 @@ function updatePreview(){
   document.getElementById('prev-p100').textContent=(prix&&km)?(prix/km*100).toFixed(2):'—';
   document.getElementById('prev-auto-th').textContent=conso?Math.round(cap/conso*100):'—';
   document.getElementById('prev-auto-re').textContent=(conso&&l)?Math.round((cap-l)/conso*100):'—';
-  const warns=[];
-  if(km&&conso){
-    if(conso<3) warns.push('⚠️ Consommation très faible ('+conso.toFixed(2)+' L/100)');
-    if(conso>20) warns.push('⚠️ Consommation très élevée ('+conso.toFixed(2)+' L/100)');
-    if(l>cap*1.05) warns.push('⚠️ Litres > capacité du réservoir ('+cap+'L)');
-    if(km<30) warns.push('⚠️ Très peu de km depuis le dernier plein');
-  }
-  const w=document.getElementById('saisie-warn');
-  if(warns.length){w.innerHTML=warns.join('<br>');w.style.display='block';}else w.style.display='none';
+  if(km) checkKmWarning(km, vehicule);
+  else { document.getElementById('km-warning').classList.remove('visible'); document.getElementById('km').classList.remove('warn','error-field'); }
 }
 
-async function submitPlein(){
+// ─── SUBMIT ───────────────────────────────────────────────────────
+async function submitPlein() {
   const km=parseFloat(document.getElementById('km').value);
   const litres=parseFloat(document.getElementById('litres').value);
   const chf_par_litre=parseFloat(document.getElementById('chf').value);
   const msg=document.getElementById('msg');
   if(!km||!litres||!chf_par_litre){msg.className='msg error';msg.textContent='Remplis tous les champs !';return;}
+  if(litres>vReservoir(vehicule)*1.1){msg.className='msg error';msg.textContent=`❌ ${litres}L dépasse la capacité du réservoir (${vReservoir(vehicule)}L) !`;return;}
   const btn=document.getElementById('submit-btn');
   btn.disabled=true;btn.textContent='Enregistrement...';
-  try{
+  try {
     const res=await api('pleins',{method:'POST',body:JSON.stringify({vehicule,km,litres,chf_par_litre})});
     if(!res.ok) throw new Error(await res.text());
     msg.className='msg success';msg.textContent='✅ Plein enregistré !';
     document.getElementById('km').value='';
     document.getElementById('litres').value='';
     document.getElementById('chf').value='';
-    document.getElementById('saisie-warn').style.display='none';
+    document.getElementById('km-warning').classList.remove('visible');
     updatePreview();await loadData();
-  }catch(e){msg.className='msg error';msg.textContent='❌ '+e.message;}
+  } catch(e){msg.className='msg error';msg.textContent='❌ '+e.message;}
   btn.disabled=false;btn.textContent='Enregistrer le plein';
   setTimeout(()=>msg.textContent='',4000);
 }
 
-function openEdit(r){
+// ─── EDIT MODAL ───────────────────────────────────────────────────
+function openEditModal(r) {
   document.getElementById('edit-id').value=r.id;
+  document.getElementById('edit-vehicule-val').value=r.vehicule;
   document.getElementById('edit-km').value=r.km;
   document.getElementById('edit-litres').value=r.litres;
   document.getElementById('edit-chf').value=r.chf_par_litre;
-  document.getElementById('edit-vehicule').value=r.vehicule;
+  document.getElementById('edit-date').value=new Date(r.created_at).toISOString().split('T')[0];
+  editSelectVehicule(r.vehicule);
+  document.getElementById('edit-msg').textContent='';
   document.getElementById('edit-modal').classList.add('open');
 }
-function closeModal(){document.getElementById('edit-modal').classList.remove('open');}
-
-async function saveEdit(){
+function editSelectVehicule(v) {
+  document.getElementById('edit-vehicule-val').value=v;
+  V_IDS.forEach(id=>{
+    const btn=document.getElementById('edit-btn-'+id);
+    if(btn) btn.className='v-btn'+(v===id?' active '+vCategorie(id):'');
+  });
+}
+function closeModal(e) {
+  if(e.target===document.getElementById('edit-modal')) document.getElementById('edit-modal').classList.remove('open');
+}
+async function saveEdit() {
   const id=document.getElementById('edit-id').value;
+  const v=document.getElementById('edit-vehicule-val').value;
   const km=parseFloat(document.getElementById('edit-km').value);
   const litres=parseFloat(document.getElementById('edit-litres').value);
   const chf_par_litre=parseFloat(document.getElementById('edit-chf').value);
-  const vehicule=document.getElementById('edit-vehicule').value;
-  if(!km||!litres||!chf_par_litre) return;
-  await api('pleins?id=eq.'+id,{method:'PATCH',body:JSON.stringify({km,litres,chf_par_litre,vehicule})});
-  closeModal();await loadData();
+  const dateVal=document.getElementById('edit-date').value;
+  const msg=document.getElementById('edit-msg');
+  if(!km||!litres||!chf_par_litre||!dateVal){msg.style.color='#f87171';msg.textContent='Remplis tous les champs.';return;}
+  if(litres>vReservoir(v)*1.1){msg.style.color='#f87171';msg.textContent=`${litres}L dépasse la capacité du réservoir (${vReservoir(v)}L).`;return;}
+  msg.style.color=getComputedStyle(document.documentElement).getPropertyValue('--text3');
+  msg.textContent='Enregistrement...';
+  const created_at=new Date(dateVal+'T12:00:00').toISOString();
+  try {
+    const res=await api(`pleins?id=eq.${id}`,{method:'PATCH',body:JSON.stringify({vehicule:v,km,litres,chf_par_litre,created_at})});
+    if(!res.ok) throw new Error(await res.text());
+    document.getElementById('edit-modal').classList.remove('open');
+    await loadData();
+  } catch(e){msg.style.color='#f87171';msg.textContent='❌ '+e.message;}
 }
 
-async function deletePlein(id){
+// ─── DELETE ───────────────────────────────────────────────────────
+async function deletePlein(id) {
   if(!confirm('Supprimer ce plein définitivement ?')) return;
-  await api('pleins?id=eq.'+id,{method:'DELETE'});
-  await loadData();
+  const res=await api('pleins?id=eq.'+id,{method:'DELETE'});
+  if(res.ok){await loadData();}else alert('Erreur lors de la suppression.');
 }
 
-function exportCSV(){
+// ─── EXPORT CSV ──────────────────────────────────────────────────
+function exportCSV() {
   const data=histoFilter==='all'?allData:allData.filter(r=>r.vehicule===histoFilter);
-  const h=['date','vehicule','km','litres','chf_par_litre','l_aux_100','prix_paye','prix_aux_100km','autonomie_theorique','autonomie_restante'];
-  const rows=data.map(r=>[fmtDate(r.created_at),r.vehicule,r.km,r.litres,r.chf_par_litre,r.l_aux_100,r.prix_paye,r.prix_aux_100km,r.autonomie_theorique,r.autonomie_restante].join(','));
-  const csv=[h.join(','),...rows].join('\n');
-  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='fuel_tracker_parents.csv';a.click();
+  if(!data.length){alert('Aucune donnée à exporter.');return;}
+  const headers=['Date','Véhicule','Km','Litres','CHF/L','L/100','Prix payé','Autonomie théo.','Autonomie rest.'];
+  const rows=data.map(r=>[
+    new Date(r.created_at).toLocaleDateString('fr-CH'),
+    r.vehicule,r.km,r.litres,r.chf_par_litre,
+    r.l_aux_100??'',r.prix_paye??'',r.autonomie_theorique??'',r.autonomie_restante??''
+  ]);
+  const csv=[headers,...rows].map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=`fuel-tracker-${histoFilter}-${new Date().toISOString().split('T')[0]}.csv`;
+  a.click(); URL.revokeObjectURL(url);
 }
 
-async function loadData(){
+// ─── CSV IMPORT ───────────────────────────────────────────────────
+function parseNum(s){if(!s)return null;return parseFloat(String(s).replace(',','.').replace(/[^0-9.-]/g,''));}
+function parseCSV(text){
+  const lines=text.trim().split('\n');
+  const headers=lines[0].split(',').map(h=>h.trim().replace(/^"|"$/g,''));
+  return lines.slice(1).map(line=>{
+    const cols=[];let cur='',inQ=false;
+    for(let c of line){if(c==='"')inQ=!inQ;else if(c===','&&!inQ){cols.push(cur.trim());cur='';}else cur+=c;}
+    cols.push(cur.trim());
+    const obj={};headers.forEach((h,i)=>obj[h]=cols[i]||'');return obj;
+  });
+}
+function detectVehicule(filename){
+  const f=filename.toLowerCase();
+  if(f.includes('mg')||f.includes('mg3')) return 'mg3';
+  if(f.includes('skoda')||f.includes('octavia')) return 'skoda_octavia';
+  return 'skoda_octavia'; // fallback
+}
+function parseDate(str){
+  if(!str) return null;
+  str = str.trim();
+  const months={janvier:1,février:2,fevrier:2,mars:3,avril:4,mai:5,juin:6,juillet:7,août:8,aout:8,septembre:9,octobre:10,novembre:11,décembre:12,decembre:12};
+  const m1=str.match(/^(\d+)\s+(\w+)\s+(\d{4})(?:\s+(\d+):(\d+))?/);
+  if(m1){const mo=months[m1[2].toLowerCase()];if(mo) return new Date(+m1[3],mo-1,+m1[1],+(m1[4]||12),+(m1[5]||0)).toISOString();}
+  const m2=str.match(/^(\d{2})\.(\d{2})\.(\d{4})(?:\s+(\d{2}):(\d{2}))?/);
+  if(m2) return new Date(+m2[3],+m2[2]-1,+m2[1],+(m2[4]||12),+(m2[5]||0)).toISOString();
+  const d=new Date(str); return isNaN(d)?null:d.toISOString();
+}
+
+function handleFiles(files) {
+  pendingRows=[];
+  const preview=document.getElementById('import-preview');
+  const btn=document.getElementById('import-btn');
+  preview.innerHTML='';preview.style.display='none';btn.style.display='none';
+  let pending=files.length;const summaries=[];
+  Array.from(files).forEach(file=>{
+    const v=detectVehicule(file.name);
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const rows=parseCSV(e.target.result);let ok=0,skip=0;
+      rows.forEach(r=>{
+        const km=parseNum(r['Km']),litres=parseNum(r['Nmbr L']),chf=parseNum(r['CHF/L']);
+        const created_at=parseDate(r['Date de creation']);
+        if(!km||!litres||!chf||km<=0||litres<=0){skip++;return;}
+        pendingRows.push({vehicule:v,km,litres,chf_par_litre:chf,created_at:created_at||new Date().toISOString()});ok++;
+      });
+      summaries.push(`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span>${vEmoji(v)} ${file.name}</span><span style="color:#34d399">${ok} pleins · ${skip} ignorés</span></div>`);
+      if(--pending===0){
+        preview.innerHTML=summaries.join('');preview.style.display='block';
+        btn.style.display=pendingRows.length?'block':'none';
+        btn.textContent=`Importer ${pendingRows.length} pleins dans Supabase`;
+      }
+    };
+    reader.readAsText(file,'utf-8');
+  });
+}
+
+async function doImport() {
+  const btn=document.getElementById('import-btn');
+  const prog=document.getElementById('import-progress');
+  const fill=document.getElementById('progress-fill');
+  const txt=document.getElementById('progress-text');
+  const msg=document.getElementById('import-msg');
+  btn.disabled=true;prog.style.display='block';msg.textContent='';
+  let done=0,errors=0,dupes=0;const total=pendingRows.length;
+  for(let i=0;i<total;i++){
+    const row=pendingRows[i];
+    try{
+      const res=await api('pleins',{method:'POST',body:JSON.stringify(row),headers:{'Prefer':'return=minimal'}});
+      if(res.status===409) dupes++;
+      else if(!res.ok){console.error(await res.text());errors++;}
+      else done++;
+    }catch{errors++;}
+    fill.style.width=Math.round((i+1)/total*100)+'%';
+    txt.textContent=`${i+1} / ${total}`;
+  }
+  btn.disabled=false;
+  if(errors===0){
+    msg.className='msg success';msg.textContent=`✅ ${done} importés · ${dupes} doublons ignorés`;
+    await loadData();
+  } else {
+    msg.className='msg error';msg.textContent=`⚠️ ${done} importés · ${dupes} doublons · ${errors} erreurs`;
+  }
+}
+
+// ─── DATA ─────────────────────────────────────────────────────────
+// ─── INIT VEHICLE BUTTONS ─────────────────────────────────────────
+function initVehicleButtons() {
+  // Saisie — actifs seulement
+  const saisieToggle = document.getElementById('saisie-toggle');
+  saisieToggle.innerHTML = V_IDS_ACTIF.map((id,i) =>
+    `<button class="v-btn${i===0?' active '+vCategorie(id):''}" id="btn-${id}" onclick="selectVehicule('${id}')">${vEmoji(id)} ${vLabel(id)}</button>`
+  ).join('');
+
+  // Edit modal — tous les véhicules (pour corriger d'anciens pleins)
+  const editToggle = document.getElementById('edit-toggle');
+  editToggle.innerHTML = V_IDS.map(id =>
+    `<button class="v-btn" id="edit-btn-${id}" onclick="editSelectVehicule('${id}')">${vEmoji(id)} ${vLabel(id)}</button>`
+  ).join('');
+}
+
+async function loadData() {
   const res=await api('pleins?select=*&order=created_at.desc&limit=2000');
   allData=await res.json();
   populateYearFilter();renderStats();renderHisto();
 }
 
-function populateYearFilter(){
+function populateYearFilter() {
   const years=[...new Set(allData.map(r=>new Date(r.created_at).getFullYear()))].sort((a,b)=>b-a);
   const sel=document.getElementById('filter-year');
   const currentYear=new Date().getFullYear();
   const alreadySet=sel.dataset.initialized;
   sel.innerHTML='<option value="all">Toutes les années</option>'+years.map(y=>`<option value="${y}">${y}</option>`).join('');
-  if(!alreadySet){const def=years.includes(currentYear)?currentYear:(years[0]||'all');sel.value=def;filters.year=def;sel.dataset.initialized='1';}
-  else if(filters.year!=='all') sel.value=filters.year;
+  if(!alreadySet){
+    const defaultYear=years.includes(currentYear)?currentYear:(years[0]||'all');
+    sel.value=defaultYear;filters.year=defaultYear;sel.dataset.initialized='1';
+  } else {
+    if(filters.year!=='all') sel.value=filters.year;
+  }
 }
 
-function setVFilter(v,el){filters.vehicule=v;document.querySelectorAll('#tab-stats .filter-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active');renderStats();}
+function setVFilter(cat,el){
+  // cat can be 'all', a categorie ('moto','voiture'), or a vehicle id
+  if(cat === 'all') {
+    filters.categorie = 'all'; filters.vehicule = 'all';
+  } else if(VEHICLES[cat]) {
+    filters.categorie = 'all'; filters.vehicule = cat;
+  } else {
+    filters.categorie = cat; filters.vehicule = 'all';
+  }
+  document.querySelectorAll('#tab-stats .filter-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  renderStats();
+}
 function setYearFilter(val){
   filters.year=val;
   const sel=document.getElementById('filter-month');
   if(val==='all'){sel.innerHTML='<option value="all">Tous les mois</option>';filters.month='all';}
-  else{const months=[...new Set(allData.filter(r=>new Date(r.created_at).getFullYear()==val).map(r=>new Date(r.created_at).getMonth()))].sort((a,b)=>a-b);sel.innerHTML='<option value="all">Tous les mois</option>'+months.map(m=>`<option value="${m}">${MONTHS[m]}</option>`).join('');filters.month='all';}
+  else{
+    const months=[...new Set(allData.filter(r=>new Date(r.created_at).getFullYear()==val).map(r=>new Date(r.created_at).getMonth()))].sort((a,b)=>a-b);
+    sel.innerHTML='<option value="all">Tous les mois</option>'+months.map(m=>`<option value="${m}">${MONTHS[m]}</option>`).join('');
+    filters.month='all';
+  }
   renderStats();
 }
 function setMonthFilter(val){filters.month=val;renderStats();}
@@ -324,31 +663,210 @@ function setHistoFilter(f,el){histoFilter=f;document.querySelectorAll('#tab-hist
 function getFiltered(){
   return allData.filter(r=>{
     const d=new Date(r.created_at);
-    if(filters.vehicule!=='all'&&r.vehicule!==filters.vehicule) return false;
+    if(filters.categorie!=='all' && vCategorie(r.vehicule)!==filters.categorie) return false;
+    if(filters.vehicule!=='all' && r.vehicule!==filters.vehicule) return false;
     if(filters.year!=='all'&&d.getFullYear()!=filters.year) return false;
     if(filters.month!=='all'&&d.getMonth()!=filters.month) return false;
     return true;
   });
 }
 
+// ─── STATS ────────────────────────────────────────────────────────
 function avg(arr,key){const v=arr.map(r=>r[key]).filter(x=>x!=null);return v.length?v.reduce((a,b)=>a+b,0)/v.length:null;}
 function sum(arr,key){return arr.reduce((a,r)=>a+(r[key]||0),0);}
 function fmt(n,d=2){return n!=null?n.toFixed(d):'—';}
 function fmtDate(s){return new Date(s).toLocaleDateString('fr-CH',{day:'2-digit',month:'short',year:'numeric'});}
 
-function bwCards(data,v){
-  const wc=data.filter(r=>r.l_aux_100&&r.vehicule===v);
-  if(!wc.length) return '';
-  const best=wc.reduce((a,b)=>a.l_aux_100<b.l_aux_100?a:b);
-  const worst=wc.reduce((a,b)=>a.l_aux_100>b.l_aux_100?a:b);
-  const bestA=wc.reduce((a,b)=>(a.autonomie_theorique||0)>(b.autonomie_theorique||0)?a:b);
-  const worstA=wc.reduce((a,b)=>(a.autonomie_theorique||999)<(b.autonomie_theorique||999)?a:b);
-  const lbl=getLabel(v);
-  return`
-    <div class="bw-card"><div class="bw-title">🏆 ${lbl} — Meilleure conso</div><div class="bw-val green">${fmt(best.l_aux_100)} L/100</div><div class="bw-date">${fmtDate(best.created_at)} · ${best.km} km</div></div>
-    <div class="bw-card"><div class="bw-title">📉 ${lbl} — Pire conso</div><div class="bw-val red">${fmt(worst.l_aux_100)} L/100</div><div class="bw-date">${fmtDate(worst.created_at)} · ${worst.km} km</div></div>
-    <div class="bw-card"><div class="bw-title">🛣️ ${lbl} — Meilleure autonomie</div><div class="bw-val green">${bestA.autonomie_theorique??'—'} km</div><div class="bw-date">${fmtDate(bestA.created_at)}</div></div>
-    <div class="bw-card"><div class="bw-title">🪫 ${lbl} — Pire autonomie</div><div class="bw-val red">${worstA.autonomie_theorique??'—'} km</div><div class="bw-date">${fmtDate(worstA.created_at)}</div></div>`;
+function buildBWSection(data, activeCat) {
+  // Show vehicles that actually appear in data; filter by active category if set
+  const vehicles = [...new Set(data.map(r=>r.vehicule))]
+    .filter(id => activeCat==='all' || vCategorie(id)===activeCat);
+
+  function bwCards(metric, goodLabel, badLabel, fmtFn, subFn) {
+    return vehicles.map(v => {
+      const vData = data.filter(r => r.vehicule === v && r[metric] != null);
+      if(!vData.length) return '';
+      const best = vData.reduce((a,b) => a[metric] < b[metric] ? a : b);
+      const worst = vData.reduce((a,b) => a[metric] > b[metric] ? a : b);
+      return `
+        <div class="bw-card">
+          <div class="bw-vehicle" style="color:${vColor(v)}">${vEmoji(v)} ${vLabel(v)}</div>
+          <div class="bw-title">${goodLabel}</div>
+          <div class="bw-val green">${fmtFn(best)}</div>
+          <div class="bw-date">${fmtDate(best.created_at)} · ${subFn(best)}</div>
+        </div>
+        <div class="bw-card">
+          <div class="bw-vehicle" style="color:${vColor(v)}">${vEmoji(v)} ${vLabel(v)}</div>
+          <div class="bw-title">${badLabel}</div>
+          <div class="bw-val red">${fmtFn(worst)}</div>
+          <div class="bw-date">${fmtDate(worst.created_at)} · ${subFn(worst)}</div>
+        </div>`;
+    }).join('');
+  }
+
+  const consoCards = bwCards('l_aux_100','🏆 Meilleure conso','📉 Pire conso',
+    r=>fmt(r.l_aux_100)+' L/100', r=>r.km+' km');
+
+  const autoCards = vehicles.map(v => {
+    const vData = data.filter(r => r.vehicule === v && r.autonomie_theorique != null);
+    if(!vData.length) return '';
+    const best = vData.reduce((a,b)=>(a.autonomie_theorique||0)>(b.autonomie_theorique||0)?a:b);
+    const worst = vData.reduce((a,b)=>(a.autonomie_theorique||999)<(b.autonomie_theorique||999)?a:b);
+    return `
+      <div class="bw-card">
+        <div class="bw-vehicle" style="color:${vColor(v)}">${vEmoji(v)} ${vLabel(v)}</div>
+        <div class="bw-title">🛣️ Meilleure autonomie</div>
+        <div class="bw-val green">${best.autonomie_theorique??'—'} km</div>
+        <div class="bw-date">${fmtDate(best.created_at)} · ${fmt(best.l_aux_100)} L/100</div>
+      </div>
+      <div class="bw-card">
+        <div class="bw-vehicle" style="color:${vColor(v)}">${vEmoji(v)} ${vLabel(v)}</div>
+        <div class="bw-title">🪫 Pire autonomie</div>
+        <div class="bw-val red">${worst.autonomie_theorique??'—'} km</div>
+        <div class="bw-date">${fmtDate(worst.created_at)} · ${fmt(worst.l_aux_100)} L/100</div>
+      </div>`;
+  }).join('');
+
+  const priceCards = vehicles.map(v => {
+    const vData = data.filter(r => r.vehicule === v);
+    if(!vData.length) return '';
+    const cheapest = vData.reduce((a,b)=>a.chf_par_litre<b.chf_par_litre?a:b);
+    const priciest = vData.reduce((a,b)=>a.chf_par_litre>b.chf_par_litre?a:b);
+    return `
+      <div class="bw-card">
+        <div class="bw-vehicle" style="color:${vColor(v)}">${vEmoji(v)} ${vLabel(v)}</div>
+        <div class="bw-title">💸 Moins cher</div>
+        <div class="bw-val green">${fmt(cheapest.chf_par_litre,3)} CHF/L</div>
+        <div class="bw-date">${fmtDate(cheapest.created_at)}</div>
+      </div>
+      <div class="bw-card">
+        <div class="bw-vehicle" style="color:${vColor(v)}">${vEmoji(v)} ${vLabel(v)}</div>
+        <div class="bw-title">💰 Plus cher</div>
+        <div class="bw-val red">${fmt(priciest.chf_par_litre,3)} CHF/L</div>
+        <div class="bw-date">${fmtDate(priciest.created_at)}</div>
+      </div>`;
+  }).join('');
+
+  return `
+    <div class="bw-section">
+      <div class="bw-section-title">⛽ Consommation</div>
+      <div class="bw-grid">${consoCards||'<div class="empty" style="padding:20px">Pas de données</div>'}</div>
+    </div>
+    <div class="bw-section">
+      <div class="bw-section-title">🛣️ Autonomie</div>
+      <div class="bw-grid">${autoCards||'<div class="empty" style="padding:20px">Pas de données</div>'}</div>
+    </div>
+    <div class="bw-section">
+      <div class="bw-section-title">💳 Prix du carburant</div>
+      <div class="bw-grid">${priceCards||'<div class="empty" style="padding:20px">Pas de données</div>'}</div>
+    </div>`;
+}
+
+function buildCompareSection(data) {
+  // Compare vehicle by vehicle
+  const vehicleIds = [...new Set(data.map(r=>r.vehicule))].filter(id=>VEHICLES[id]);
+  if(vehicleIds.length < 2) return '';
+  const vehicleData = vehicleIds.map(id=>data.filter(r=>r.vehicule===id));
+  if(vehicleData.some(d=>d.length===0)) return '';
+
+  function stats(d) {
+    const totalKm=sum(d,'km'),totalL=sum(d,'litres'),totalCHF=sum(d,'prix_paye');
+    return {totalKm,totalL,totalCHF,avgConso:avg(d,'l_aux_100'),avgP100:avg(d,'prix_aux_100km'),
+      avgPrix:avg(d,'chf_par_litre'),pleins:d.length,
+      avgAutoTh:avg(d.filter(r=>r.autonomie_theorique),'autonomie_theorique')};
+  }
+  const metrics = [
+    ['Pleins enregistrés', s=>s.pleins],
+    ['Km totaux',          s=>s.totalKm.toFixed(0)+' km'],
+    ['Litres totaux',      s=>s.totalL.toFixed(1)+' L'],
+    ['Dépense totale',     s=>s.totalCHF.toFixed(2)+' CHF'],
+    ['Conso. moyenne',     s=>fmt(s.avgConso)+' L/100'],
+    ['Coût / 100 km',      s=>fmt(s.avgP100)+' CHF'],
+    ['Prix moy./litre',    s=>fmt(s.avgPrix,3)+' CHF'],
+    ['Autonomie moy.',     s=>s.avgAutoTh?Math.round(s.avgAutoTh)+' km':'—'],
+  ];
+  const cols = vehicleIds.map((id,i) => {
+    const s=stats(vehicleData[i]);
+    const rows=metrics.map(([l,fn])=>`<div class="compare-row"><span class="lbl">${l}</span><span class="val">${fn(s)}</span></div>`).join('');
+    return `<div class="compare-col">
+      <h3 style="color:${vColor(id)}">${vEmoji(id)} ${vLabel(id)}</h3>
+      <div style="font-size:0.72rem;color:var(--text3);margin-bottom:10px">Réservoir ${vReservoir(id)} L</div>
+      ${rows}</div>`;
+  }).join('');
+  return `<div class="card"><h2>⚖️ Comparaison véhicules</h2><div class="compare-grid">${cols}</div></div>`;
+}
+
+// ─── SVG LINE CHART ──────────────────────────────────────────────
+function isMobile() { return window.innerWidth < 768; }
+
+function svgLine(points, color, W, H, yMin=null, yMax=null) {
+  const mobile = isMobile();
+  W = W ?? (mobile ? 400 : 640);
+  H = H ?? (mobile ? 130 : 100);
+  const fs = { tick: mobile?13:10, label: mobile?12:9, pad: mobile?44:38, padB: mobile?30:24, padR: mobile?14:12 };
+  if(points.length < 2) return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto"><text x="${W/2}" y="${H/2}" text-anchor="middle" fill="var(--text3)" font-size="14">Pas assez de données</text></svg>`;
+  const vals = points.map(p=>p.y);
+  const lo = yMin ?? Math.min(...vals);
+  const hi = yMax ?? Math.max(...vals);
+  const pad = { t:14, b:fs.padB, l:fs.pad, r:fs.padR };
+  const w = W - pad.l - pad.r, h = H - pad.t - pad.b;
+  const xS = i => pad.l + (i/(points.length-1))*w;
+  const yS = v => pad.t + h - ((v-lo)/(hi-lo||1))*h;
+  const fillPts = points.map((p,i)=>`${xS(i)},${yS(p.y)}`).join(' ');
+  const fillPath = `${pad.l},${pad.t+h} ${fillPts} ${pad.l+w},${pad.t+h}`;
+  const linePath = points.map((p,i)=>`${i===0?'M':'L'}${xS(i)},${yS(p.y)}`).join(' ');
+  const ticks = [lo, (lo+hi)/2, hi].map(v=>{
+    const y = yS(v);
+    return `<text x="${pad.l-6}" y="${y+4}" text-anchor="end" fill="var(--text3)" font-size="${fs.tick}">${v%1===0?v:v.toFixed(2)}</text>
+            <line x1="${pad.l}" y1="${y}" x2="${pad.l+w}" y2="${y}" stroke="var(--border)" stroke-width="0.5"/>`;
+  }).join('');
+  const maxLabels = mobile ? 4 : 6;
+  const step = Math.max(1, Math.floor((points.length-1)/(maxLabels-1)));
+  const xLabels = points.filter((_,i)=>i%step===0||i===points.length-1).map((p)=>{
+    const i = points.indexOf(p);
+    return `<text x="${xS(i)}" y="${H-6}" text-anchor="middle" fill="var(--text3)" font-size="${fs.label}">${p.label}</text>`;
+  }).join('');
+  const n = points.length;
+  const sumX = points.reduce((a,_,i)=>a+i,0);
+  const sumY = points.reduce((a,p)=>a+p.y,0);
+  const sumXY = points.reduce((a,p,i)=>a+i*p.y,0);
+  const sumX2 = points.reduce((a,_,i)=>a+i*i,0);
+  const slope = (n*sumXY - sumX*sumY)/(n*sumX2 - sumX*sumX||1);
+  const intercept = (sumY - slope*sumX)/n;
+  const tx1=xS(0), ty1=yS(Math.max(lo,Math.min(hi,intercept)));
+  const tx2=xS(n-1), ty2=yS(Math.max(lo,Math.min(hi,intercept+slope*(n-1))));
+  const trendColor = slope > 0.05 ? '#ef4444' : slope < -0.05 ? '#22c55e' : '#888';
+  const r = mobile ? 3.5 : 3;
+  const sw = mobile ? 2.5 : 2;
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;overflow:visible">
+    <defs>
+      <linearGradient id="g${color.replace('#','')}" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="${color}" stop-opacity="0.18"/>
+        <stop offset="100%" stop-color="${color}" stop-opacity="0.01"/>
+      </linearGradient>
+    </defs>
+    ${ticks}${xLabels}
+    <polygon points="${fillPath}" fill="url(#g${color.replace('#','')})" />
+    <path d="${linePath}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round" stroke-linecap="round"/>
+    <line x1="${tx1}" y1="${ty1}" x2="${tx2}" y2="${ty2}" stroke="${trendColor}" stroke-width="1.5" stroke-dasharray="5 3" opacity="0.7"/>
+    ${points.map((p,i)=>`<circle cx="${xS(i)}" cy="${yS(p.y)}" r="${r}" fill="${color}" stroke="var(--bg2)" stroke-width="1.5"><title>${p.label}: ${p.y%1===0?p.y:p.y.toFixed(2)}</title></circle>`).join('')}
+  </svg>`;
+}
+
+function trendBadge(points) {
+  if(points.length < 4) return '';
+  const n = points.length;
+  const sumX = points.reduce((a,_,i)=>a+i, 0);
+  const sumY = points.reduce((a,p)=>a+p.y, 0);
+  const sumXY = points.reduce((a,p,i)=>a+i*p.y, 0);
+  const sumX2 = points.reduce((a,_,i)=>a+i*i, 0);
+  const slope = (n*sumXY - sumX*sumY) / (n*sumX2 - sumX*sumX || 1);
+  // slope = variation en L/100 par mois — on projette sur 12 mois pour avoir quelque chose de lisible
+  const delta12 = slope * 12;
+  if(Math.abs(delta12) < 0.05) return `<span style="font-size:0.8rem;color:var(--text3);font-weight:600;margin-left:6px">→ stable</span>`;
+  const sign = delta12 > 0 ? '↑ +' : '↓ ';
+  const col  = delta12 > 0 ? '#ef4444' : '#22c55e';
+  return `<span style="font-size:0.8rem;color:${col};font-weight:600;margin-left:6px">${sign}${Math.abs(delta12).toFixed(2)} L/100/an</span>`;
 }
 
 function renderStats(){
@@ -356,104 +874,278 @@ function renderStats(){
   const el=document.getElementById('stats-content');
   if(!data.length){el.innerHTML='<div class="empty">Aucune donnée pour cette période</div>';return;}
 
-  const suspicious=data.filter(r=>{const cap=getCap(r.vehicule);return(r.l_aux_100&&(r.l_aux_100<3||r.l_aux_100>20))||r.litres>cap||r.km<30;});
+  // ── Base metrics ──────────────────────────────────────────────
+  const totalKm=sum(data,'km'), totalL=sum(data,'litres'), totalCHF=sum(data,'prix_paye');
+  const avgConso=avg(data,'l_aux_100'), avgPrix=avg(data,'chf_par_litre'), avgP100=avg(data,'prix_aux_100km');
+
+  // ── Alertes ───────────────────────────────────────────────────
+  const suspicious=data.filter(r=>{
+    const lim=vConsoLimits(r.vehicule);
+    return(r.l_aux_100&&(r.l_aux_100<lim.min||r.l_aux_100>lim.max))||r.litres>vReservoir(r.vehicule)*1.1||r.km<20;
+  });
+  const alertBox=suspicious.length?`<div class="alert-box"><h3>⚠️ ${suspicious.length} plein${suspicious.length>1?'s':''} suspect${suspicious.length>1?'s':''}</h3>${suspicious.map(r=>{const lim=vConsoLimits(r.vehicule);const reasons=[];if(r.l_aux_100&&r.l_aux_100<lim.min)reasons.push('conso trop faible ('+r.l_aux_100+' L/100)');if(r.l_aux_100&&r.l_aux_100>lim.max)reasons.push('conso trop élevée ('+r.l_aux_100+' L/100)');if(r.litres>vReservoir(r.vehicule))reasons.push('litres > réservoir');if(r.km<20)reasons.push('km très faibles');return`<div class="alert-item"><span>${fmtDate(r.created_at)} · ${vEmoji(r.vehicule)} ${vLabel(r.vehicule)} · ${r.km}km · ${r.litres}L</span><span class="reason">${reasons.join(', ')}</span><button class="action-btn" onclick="openEditModal(${JSON.stringify(r).replace(/"/g,'&quot;')})" title="Modifier">✏️</button></div>`;}).join('')}</div>`:'';
+
+  // ── Projection annualisée — uniquement sur l'année en cours ──
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const startOfYear = new Date(currentYear, 0, 1);
+  const dayOfYear = Math.round((now - startOfYear) / (24*3600*1000)) || 1;
+  const recentForProj = allData.filter(r => new Date(r.created_at) >= startOfYear);
+  let projHTML = '';
+  const showProj = filters.month === 'all' && (filters.year === 'all' || parseInt(filters.year) === currentYear);
+  if(showProj && recentForProj.length >= 2) {
+    const rCHF = sum(recentForProj,'prix_paye'), rKm = sum(recentForProj,'km');
+    const projCHF = Math.round(rCHF / dayOfYear * 365);
+    const projKm  = Math.round(rKm  / dayOfYear * 365);
+    const projL   = Math.round(sum(recentForProj,'litres') / dayOfYear * 365);
+    projHTML = `<div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px">
+      <div class="stat-card highlight"><div class="label">Dépense projetée / an</div><div class="value purple">${projCHF} <span style="font-size:1rem">CHF</span></div><div class="sub">basé sur ${dayOfYear} jours (depuis jan. ${currentYear})</div></div>
+      <div class="stat-card highlight"><div class="label">Km projetés / an</div><div class="value purple">${projKm.toLocaleString('fr-CH')}</div><div class="sub">${projL} L projetés</div></div>
+      <div class="stat-card highlight"><div class="label">Coût moyen / mois</div><div class="value purple">${Math.round(projCHF/12)} <span style="font-size:1rem">CHF</span></div><div class="sub">${Math.round(projKm/12).toLocaleString('fr-CH')} km/mois</div></div>
+    </div>`;
+  }
+
+  // ── Par véhicule (résumé compact) — tous les véhicules présents dans les données ──
+  const vIdsInData = [...new Set(data.map(r=>r.vehicule))];
+  const byV = vIdsInData.map(id => {
+    const d=data.filter(r=>r.vehicule===id);
+    if(!d.length) return '';
+    const isActif = VEHICLES[id]?.actif ?? true;
+    const badge = isActif ? '' : ' <span style="font-size:0.68rem;opacity:0.5">(vendu)</span>';
+    return `<div class="stat-card"><div class="label" style="color:${vColor(id)}">${vEmoji(id)} ${vLabel(id)}${badge} — ${d.length} pleins</div><div class="value" style="color:${vColor(id)}">${fmt(avg(d,'l_aux_100'))} <span style="font-size:1rem">L/100</span></div><div class="sub">${fmt(avg(d,'prix_aux_100km'))} CHF/100km · ${sum(d,'km').toFixed(0)} km · ${sum(d,'prix_paye').toFixed(2)} CHF</div></div>`;
+  }).join('');
+
+  // ── Données mensuelles ────────────────────────────────────────
   const byMonth={};
   data.forEach(r=>{
     const d=new Date(r.created_at);
     const k=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-    if(!byMonth[k]) byMonth[k]={cost:0,conso:[],label:MONTHS[d.getMonth()]+' '+String(d.getFullYear()).slice(2)};
+    if(!byMonth[k]) byMonth[k]={cost:0,km:0,conso:[],prix:[],label:MONTHS[d.getMonth()]+' '+String(d.getFullYear()).slice(2)};
     byMonth[k].cost+=r.prix_paye||0;
+    byMonth[k].km+=r.km||0;
     if(r.l_aux_100) byMonth[k].conso.push(r.l_aux_100);
+    if(r.chf_par_litre) byMonth[k].prix.push(r.chf_par_litre);
   });
-  const monthKeys=Object.keys(byMonth).sort().slice(-12);
-  const maxCost=Math.max(...monthKeys.map(k=>byMonth[k].cost),1);
-  const maxConso=Math.max(...monthKeys.map(k=>byMonth[k].conso.length?byMonth[k].conso.reduce((a,b)=>a+b)/byMonth[k].conso.length:0),1);
+  const monthKeys=Object.keys(byMonth).sort().slice(-18);
 
+  // Points pour graphiques SVG
+  const consoPoints = monthKeys
+    .map(k=>({label:byMonth[k].label, y:byMonth[k].conso.length ? byMonth[k].conso.reduce((a,b)=>a+b)/byMonth[k].conso.length : null}))
+    .filter(p=>p.y!=null)
+    .map(p=>({...p,y:Math.round(p.y*100)/100}));
+
+  const prixPoints = monthKeys
+    .map(k=>({ key:k, label:byMonth[k].label, y:byMonth[k].prix.length ? Math.round(byMonth[k].prix.reduce((a,b)=>a+b)/byMonth[k].prix.length*1000)/1000 : null }))
+    .filter(p=>p.y!=null);
+
+  const costPoints = monthKeys
+    .map(k=>({label:byMonth[k].label, y:Math.round(byMonth[k].cost*100)/100}))
+    .filter(p=>p.y>0);
+
+  // Bars coût mensuel (garder format original)
+  const maxCost=Math.max(...monthKeys.map(k=>byMonth[k].cost),1);
+  const costBars=monthKeys.map(k=>{const h=Math.max(4,Math.round(byMonth[k].cost/maxCost*100));return`<div class="bar-group"><div class="bar-val">${byMonth[k].cost.toFixed(0)}</div><div class="bar" style="height:${h}px;background:#4f46e5"></div><div class="bar-label">${byMonth[k].label}</div></div>`;}).join('');
+
+  // ── Par année ─────────────────────────────────────────────────
   const byYear={};
   data.forEach(r=>{const y=new Date(r.created_at).getFullYear();if(!byYear[y]) byYear[y]={cost:0,km:0,pleins:0};byYear[y].cost+=r.prix_paye||0;byYear[y].km+=r.km||0;byYear[y].pleins++;});
+  const yearRows=Object.keys(byYear).sort((a,b)=>b-a).map(y=>`<tr><td>${y}</td><td>${byYear[y].km.toFixed(0)} km</td><td>${byYear[y].cost.toFixed(2)} CHF</td><td>${byYear[y].pleins}</td><td>${(byYear[y].cost/byYear[y].km*100).toFixed(2)} CHF/100km</td></tr>`).join('');
 
-  const byV=Object.keys(VEHICLES).map(v=>{
-    const d=data.filter(r=>r.vehicule===v);if(!d.length) return'';
-    return`<div class="stat-card"><div class="label">${getLabel(v)} — ${d.length} pleins</div><div class="value ${v}-color">${fmt(avg(d,'l_aux_100'))} <span style="font-size:1rem">L/100</span></div><div class="sub">${sum(d,'km').toFixed(0)} km · ${sum(d,'prix_paye').toFixed(2)} CHF · ${fmt(avg(d,'prix_aux_100km'))} CHF/100km</div></div>`;
-  }).join('');
+  // ── Tendance conso par véhicule — chacun sur son propre historique complet ──
+  const consoByVehicle = {};
+  V_IDS.forEach(id => {
+    const vEntries = data.filter(r => r.vehicule === id && r.l_aux_100 != null);
+    const byM = {};
+    vEntries.forEach(r => {
+      const d = new Date(r.created_at);
+      const k = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+      if(!byM[k]) byM[k] = { sum: 0, n: 0, label: MONTHS[d.getMonth()]+' '+String(d.getFullYear()).slice(2) };
+      byM[k].sum += r.l_aux_100;
+      byM[k].n++;
+    });
+    consoByVehicle[id] = Object.keys(byM).sort().map(k => ({
+      key: k,
+      label: byM[k].label,
+      y: Math.round(byM[k].sum / byM[k].n * 100) / 100
+    }));
+  });
 
-  let compareSection='';
-  if(filters.vehicule==='all'){
-    const ds=data.filter(r=>r.vehicule==='skoda');
-    const dm=data.filter(r=>r.vehicule==='mg');
-    if(ds.length&&dm.length){
-      compareSection=`<div class="card"><h2>🔄 Comparaison sur la période</h2><div style="overflow-x:auto"><table>
-        <thead><tr><th>Métrique</th><th>🚗 Skoda</th><th>🚗 MG 3</th></tr></thead>
-        <tbody>
-          <tr><td>Km parcourus</td><td>${sum(ds,'km').toFixed(0)}</td><td>${sum(dm,'km').toFixed(0)}</td></tr>
-          <tr><td>Total dépensé</td><td>${sum(ds,'prix_paye').toFixed(2)} CHF</td><td>${sum(dm,'prix_paye').toFixed(2)} CHF</td></tr>
-          <tr><td>Conso. moyenne</td><td>${fmt(avg(ds,'l_aux_100'))} L/100</td><td>${fmt(avg(dm,'l_aux_100'))} L/100</td></tr>
-          <tr><td>Coût / 100km</td><td>${fmt(avg(ds,'prix_aux_100km'))} CHF</td><td>${fmt(avg(dm,'prix_aux_100km'))} CHF</td></tr>
-          <tr><td>Prix moy. / litre</td><td>${fmt(avg(ds,'chf_par_litre'),3)} CHF</td><td>${fmt(avg(dm,'chf_par_litre'),3)} CHF</td></tr>
-          <tr><td>Nombre de pleins</td><td>${ds.length}</td><td>${dm.length}</td></tr>
-        </tbody>
-      </table></div></div>`;
-    }
+  // Dual SVG line chart — two series on same axes
+  // points must have {key:'YYYY-MM', label:'Mmm YY', y:number}
+  function svgDualLine(series) {
+    const mobile = isMobile();
+    const W=mobile?400:640, H=mobile?160:120, pad={t:14,b:mobile?30:26,l:mobile?44:38,r:mobile?14:12};
+    const fs = { tick: mobile?13:10, label: mobile?12:9 };
+    const maxLabels = mobile ? 4 : 6;
+    const w=W-pad.l-pad.r, h=H-pad.t-pad.b;
+    const allVals = series.flatMap(s=>s.points.map(p=>p.y));
+    if(allVals.length < 2) return '<div class="empty" style="padding:20px">Pas assez de données</div>';
+    const lo=Math.min(...allVals)*0.97, hi=Math.max(...allVals)*1.03;
+    // Build unified x-axis from YYYY-MM keys, sorted chronologically
+    const allKeys=[...new Set(series.flatMap(s=>s.points.map(p=>p.key)))].sort();
+    const keyToLabel={};
+    series.forEach(s=>s.points.forEach(p=>{ keyToLabel[p.key]=p.label; }));
+    const n=allKeys.length;
+    const xS=i=>pad.l+(i/(n-1||1))*w;
+    const yS=v=>pad.t+h-((v-lo)/(hi-lo||1))*h;
+    // ticks
+    const ticks=[lo,(lo+hi)/2,hi].map(v=>`
+      <text x="${pad.l-6}" y="${yS(v)+4}" text-anchor="end" fill="var(--text3)" font-size="${fs.tick}">${v.toFixed(1)}</text>
+      <line x1="${pad.l}" y1="${yS(v)}" x2="${pad.l+w}" y2="${yS(v)}" stroke="var(--border)" stroke-width="0.5"/>`).join('');
+    // Labels X : espacement régulier + dernier point, avec protection anti-chevauchement
+    const step = Math.max(1, Math.floor((n-1)/(maxLabels-1)));
+    const minSpacing = w / (maxLabels + 1);
+    const labelIndices = new Set();
+    // Première passe : indices réguliers
+    for(let i=0; i<n; i+=step) labelIndices.add(i);
+    // Ajouter le dernier seulement s'il est assez loin du précédent affiché
+    const lastRegular = Math.max(...[...labelIndices]);
+    if(n-1 !== lastRegular && xS(n-1) - xS(lastRegular) >= minSpacing) labelIndices.add(n-1);
+    const xLabels = [...labelIndices].sort((a,b)=>a-b).map(i =>
+      `<text x="${xS(i)}" y="${H-6}" text-anchor="middle" fill="var(--text3)" font-size="${fs.label}">${keyToLabel[allKeys[i]]??allKeys[i]}</text>`
+    ).join('');
+    // series paths
+    const paths = series.map(s=>{
+      const pts=allKeys.map(key=>{const p=s.points.find(p=>p.key===key);return p?{x:xS(allKeys.indexOf(key)),y:yS(p.y)}:null;});
+      const linePts=pts.filter(Boolean);
+      if(linePts.length<2) return '';
+      const fillPath=`${linePts[0].x},${pad.t+h} ${linePts.map(p=>`${p.x},${p.y}`).join(' ')} ${linePts[linePts.length-1].x},${pad.t+h}`;
+      const linePath=linePts.map((p,i)=>`${i===0?'M':'L'}${p.x},${p.y}`).join(' ');
+      const gid=`g${s.color.replace('#','')}`;
+      const r = mobile ? 3.5 : 3, sw = mobile ? 2.5 : 2;
+      const circles=linePts.map(p=>`<circle cx="${p.x}" cy="${p.y}" r="${r}" fill="${s.color}" stroke="var(--bg2)" stroke-width="1.5"/>`).join('');
+      return `<defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${s.color}" stop-opacity="0.12"/><stop offset="100%" stop-color="${s.color}" stop-opacity="0"/></linearGradient></defs>
+        <polygon points="${fillPath}" fill="url(#${gid})"/>
+        <path d="${linePath}" fill="none" stroke="${s.color}" stroke-width="${sw}" stroke-linejoin="round" stroke-linecap="round"/>
+        ${circles}`;
+    }).join('');
+    const legend=series.map(s=>`<span style="display:inline-flex;align-items:center;gap:5px;margin-right:14px;font-size:0.82rem;color:var(--text2)"><svg width="16" height="3"><line x1="0" y1="1.5" x2="16" y2="1.5" stroke="${s.color}" stroke-width="2.5"/></svg>${s.label}</span>`).join('');
+    return `<div style="margin-bottom:8px">${legend}</div>
+      <svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;overflow:visible">${ticks}${xLabels}${paths}</svg>`;
   }
 
-  let bwSection='';
-  if(filters.vehicule==='all') bwSection=`<div class="bw-grid">${bwCards(data,'skoda')}${bwCards(data,'mg')}</div>`;
-  else bwSection=`<div class="bw-grid">${bwCards(data,filters.vehicule)}</div>`;
+  const dualConsoSeries = V_IDS
+    .filter(id => consoByVehicle[id].length >= 2)
+    .map(id => ({ id, label: `${vEmoji(id)} ${vLabel(id)}`, color: vColor(id), points: consoByVehicle[id] }));
+  // Trend badges — un par véhicule présent dans les données filtrées
+  const consoTrendBadges = [...new Set(data.map(r=>r.vehicule))].map(id => {
+    const allPts = [...allData]
+      .filter(r => r.vehicule === id && r.l_aux_100 != null)
+      .sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
+    const byM = {};
+    allPts.forEach(r => {
+      const d = new Date(r.created_at);
+      const k = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+      if(!byM[k]) byM[k] = [];
+      byM[k].push(r.l_aux_100);
+    });
+    const pts = Object.keys(byM).sort().map(k => ({ y: byM[k].reduce((a,b)=>a+b)/byM[k].length }));
+    if(!pts.length) return '';
+    return `<span style="font-size:0.8rem;color:${vColor(id)};margin-right:8px">${vEmoji(id)} ${vLabel(id)}${trendBadge(pts)}</span>`;
+  }).join('');
 
-  const cheapest=data.reduce((a,b)=>a.chf_par_litre<b.chf_par_litre?a:b,data[0]);
-  const priciest=data.reduce((a,b)=>a.chf_par_litre>b.chf_par_litre?a:b,data[0]);
-  const costBars=monthKeys.map(k=>{const h=Math.max(4,Math.round(byMonth[k].cost/maxCost*100));return`<div class="bar-group"><div class="bar-val">${byMonth[k].cost.toFixed(0)}</div><div class="bar" style="height:${h}px;background:#4f46e5"></div><div class="bar-label">${byMonth[k].label}</div></div>`;}).join('');
-  const consoBars=monthKeys.map(k=>{const a=byMonth[k].conso.length?byMonth[k].conso.reduce((x,y)=>x+y)/byMonth[k].conso.length:0;const h=Math.max(4,Math.round(a/maxConso*100));return`<div class="bar-group"><div class="bar-val">${a?a.toFixed(1):''}</div><div class="bar" style="height:${h}px;background:#4ade80"></div><div class="bar-label">${byMonth[k].label}</div></div>`;}).join('');
-  const yearRows=Object.keys(byYear).sort((a,b)=>b-a).map(y=>`<tr><td>${y}</td><td>${byYear[y].km.toFixed(0)} km</td><td>${byYear[y].cost.toFixed(2)} CHF</td><td>${byYear[y].pleins}</td><td>${(byYear[y].cost/byYear[y].km*100).toFixed(2)} CHF/100km</td></tr>`).join('');
-  const alertBox=suspicious.length?`<div class="alert-box"><h3>⚠️ ${suspicious.length} plein${suspicious.length>1?'s':''} suspect${suspicious.length>1?'s':''}</h3>${suspicious.map(r=>{const cap=getCap(r.vehicule);const reasons=[];if(r.l_aux_100&&r.l_aux_100<3)reasons.push('conso très faible');if(r.l_aux_100&&r.l_aux_100>20)reasons.push('conso élevée ('+r.l_aux_100+' L/100)');if(r.litres>cap)reasons.push('litres > réservoir');if(r.km<30)reasons.push('km trop faibles');return`<div class="alert-item"><span>${fmtDate(r.created_at)} · ${getLabel(r.vehicule)} · ${r.km}km · ${r.litres}L</span><span class="reason">${reasons.join(', ')}</span></div>`;}).join('')}</div>`:'';
+  // ── OUTPUT ────────────────────────────────────────────────────
+  el.innerHTML=`
+    ${alertBox}
 
-  el.innerHTML=`${alertBox}
+    <!-- 1. RÉSUMÉ GLOBAL — ce qu'on veut voir en un clin d'œil -->
     <div class="stats-grid-4">
-      <div class="stat-card highlight"><div class="label">Total km</div><div class="value purple">${sum(data,'km').toFixed(0)}</div><div class="sub">${data.length} pleins</div></div>
-      <div class="stat-card highlight"><div class="label">Total dépensé</div><div class="value purple">${sum(data,'prix_paye').toFixed(2)} <span style="font-size:1rem">CHF</span></div><div class="sub">${sum(data,'litres').toFixed(1)} L</div></div>
-      <div class="stat-card highlight"><div class="label">Conso. moyenne</div><div class="value purple">${fmt(avg(data,'l_aux_100'))} <span style="font-size:1rem">L/100</span></div><div class="sub">${fmt(avg(data,'prix_aux_100km'))} CHF/100km</div></div>
-      <div class="stat-card highlight"><div class="label">Prix moy. / litre</div><div class="value purple">${fmt(avg(data,'chf_par_litre'),3)} <span style="font-size:1rem">CHF</span></div><div class="sub">min ${fmt(Math.min(...data.map(r=>r.chf_par_litre)),3)} · max ${fmt(Math.max(...data.map(r=>r.chf_par_litre)),3)}</div></div>
+      <div class="stat-card highlight"><div class="label">Total km</div><div class="value purple">${totalKm.toFixed(0)}</div><div class="sub">${data.length} pleins</div></div>
+      <div class="stat-card highlight"><div class="label">Total dépensé</div><div class="value purple">${totalCHF.toFixed(2)} <span style="font-size:1rem">CHF</span></div><div class="sub">${totalL.toFixed(1)} L consommés</div></div>
+      <div class="stat-card highlight"><div class="label">Conso. moyenne</div><div class="value purple">${fmt(avgConso)} <span style="font-size:1rem">L/100</span></div><div class="sub">${fmt(avgP100)} CHF/100km</div></div>
+      <div class="stat-card highlight"><div class="label">Prix moy. / litre</div><div class="value purple">${fmt(avgPrix,3)} <span style="font-size:1rem">CHF</span></div><div class="sub">min ${fmt(Math.min(...data.map(r=>r.chf_par_litre)),3)} · max ${fmt(Math.max(...data.map(r=>r.chf_par_litre)),3)}</div></div>
     </div>
+
+    <!-- 2. PAR VÉHICULE — comparaison rapide -->
     <div class="stats-grid">${byV}</div>
-    ${compareSection}
-    ${bwSection}
-    <div class="bw-grid">
-      <div class="bw-card"><div class="bw-title">💸 Moins cher</div><div class="bw-val green">${fmt(cheapest?.chf_par_litre,3)} CHF/L</div><div class="bw-date">${cheapest?fmtDate(cheapest.created_at):''}</div></div>
-      <div class="bw-card"><div class="bw-title">💰 Plus cher</div><div class="bw-val red">${fmt(priciest?.chf_par_litre,3)} CHF/L</div><div class="bw-date">${priciest?fmtDate(priciest.created_at):''}</div></div>
+
+    <!-- 3. PROJECTION & RYTHME — ce qui aide à planifier -->
+    ${projHTML}
+
+    <!-- 4. TENDANCE CONSO — signal de problème mécanique potentiel -->
+    <div class="card">
+      <h2>📈 Tendance consommation (L/100km)</h2>
+      <div style="margin:-8px 0 14px;line-height:1.8">${consoTrendBadges}</div>
+      ${dualConsoSeries.length ? svgDualLine(dualConsoSeries) : '<div class="empty">Pas assez de données</div>'}
+      <div style="font-size:0.75rem;color:var(--text3);margin-top:10px">Moyenne mensuelle par véhicule. Une hausse persistante peut indiquer un problème mécanique.</div>
     </div>
+
+    <!-- 5. PRIX DU LITRE — évolution dans le temps -->
+    <div class="card">
+      <h2>💳 Prix du litre (CHF/L)</h2>
+      ${svgLine(prixPoints, '#3b82f6')}
+    </div>
+
+    <!-- 6. COÛT MENSUEL — bilan budget -->
     <div class="card"><h2>💰 Coût mensuel (CHF)</h2><div class="chart-wrap"><div class="chart">${costBars}</div></div></div>
-    <div class="card"><h2>⛽ Consommation mensuelle (L/100)</h2><div class="chart-wrap"><div class="chart">${consoBars}</div></div></div>
+
+    <!-- 7. COMPARAISON MOTO vs VOITURE -->
+    ${buildCompareSection(data)}
+
+    <!-- 8. BEST/WORST par véhicule — référence, mais moins urgent -->
+    ${buildBWSection(data, filters.categorie)}
+
+    <!-- 9. PAR ANNÉE — archive -->
     <div class="card"><h2>📅 Par année</h2><div style="overflow-x:auto"><table><thead><tr><th>Année</th><th>Km</th><th>Coût total</th><th>Pleins</th><th>Coût/100km</th></tr></thead><tbody>${yearRows}</tbody></table></div></div>`;
 }
 
+// ─── HISTORIQUE ───────────────────────────────────────────────────
 function renderHisto(){
-  const data=histoFilter==='all'?allData:allData.filter(r=>r.vehicule===histoFilter);
+  const data = histoFilter==='all' ? allData
+    : allData.filter(r => vCategorie(r.vehicule)===histoFilter || r.vehicule===histoFilter);
   const el=document.getElementById('histo-content');
   if(!data.length){el.innerHTML='<div class="empty">Aucun plein</div>';return;}
-  const rows=data.map(r=>`<tr>
-    <td>${fmtDate(r.created_at)}</td>
-    <td><span class="badge ${r.vehicule}">${getLabel(r.vehicule)}</span></td>
-    <td>${r.km} km</td><td>${r.litres} L</td><td>${r.chf_par_litre} CHF</td>
-    <td>${r.l_aux_100??'—'} L/100</td><td>${r.prix_paye??'—'} CHF</td>
-    <td>${r.autonomie_theorique??'—'} km</td><td>${r.autonomie_restante??'—'} km</td>
-    <td>
-      <button class="action-btn" onclick='openEdit(${JSON.stringify(r)})' title="Modifier">✏️</button>
-      <button class="action-btn" onclick="deletePlein('${r.id}')" title="Supprimer">🗑️</button>
-    </td>
-  </tr>`).join('');
+  const rows=data.map(r=>{
+    const lim=vConsoLimits(r.vehicule);
+    const suspect=(r.l_aux_100&&(r.l_aux_100<lim.min||r.l_aux_100>lim.max))||r.litres>vReservoir(r.vehicule)*1.1||r.km<20;
+    return`<tr style="${suspect?'background:var(--warn-bg)':''}"><td>${fmtDate(r.created_at)}</td><td><span class="badge ${r.vehicule}" style="background:${vColor(r.vehicule)}20;color:${vColor(r.vehicule)}">${vEmoji(r.vehicule)} ${vLabel(r.vehicule)}</span></td><td>${r.km} km</td><td>${r.litres} L</td><td>${r.chf_par_litre} CHF</td><td>${r.l_aux_100??'—'} L/100</td><td>${r.prix_paye??'—'} CHF</td><td>${r.autonomie_theorique??'—'} km</td><td>${r.autonomie_restante??'—'} km</td><td style="white-space:nowrap"><button class="action-btn" onclick='openEditModal(${JSON.stringify(r)})' title="Modifier">✏️</button><button class="action-btn" onclick="deletePlein('${r.id}')" title="Supprimer">🗑️</button></td></tr>`;
+  }).join('');
   el.innerHTML=`<div style="overflow-x:auto"><table><thead><tr><th>Date</th><th>Véhicule</th><th>Km</th><th>Litres</th><th>CHF/L</th><th>L/100</th><th>Prix</th><th>Auto. théo.</th><th>Auto. rest.</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 
+// ─── TABS ─────────────────────────────────────────────────────────
 function showTab(t){
-  ['stats','historique','saisie'].forEach(id=>{document.getElementById('tab-'+id).style.display=id===t?'block':'none';});
-  document.querySelectorAll('.tab').forEach((b,i)=>{b.classList.toggle('active',['stats','historique','saisie'][i]===t);});
-  if(t!=='saisie') loadData();
+  ['stats','historique','saisie','import'].forEach(id=>{document.getElementById('tab-'+id).style.display=id===t?'block':'none';});
+  document.querySelectorAll('.tab').forEach((b,i)=>{b.classList.toggle('active',['stats','historique','saisie','import'][i]===t);});
+  if(t!=='saisie'&&t!=='import') loadData();
 }
 
-// Aussi exécuter le trigger sur PATCH
-const origSaveEdit=saveEdit;
+function toggleTheme() {
+  const root = document.documentElement;
+  const current = root.getAttribute('data-theme');
+  // Si pas de data-theme, on détecte le thème système actuel
+  const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const isDark = current === 'dark' || (!current && systemDark);
+  const next = isDark ? 'light' : 'dark';
+  root.setAttribute('data-theme', next);
+  document.getElementById('theme-btn').textContent = next === 'dark' ? '☀️' : '🌙';
+  localStorage.setItem('ft-theme', next);
+}
 
+function initTheme() {
+  const saved = localStorage.getItem('ft-theme');
+  if(saved) {
+    document.documentElement.setAttribute('data-theme', saved);
+    document.getElementById('theme-btn').textContent = saved === 'dark' ? '☀️' : '🌙';
+  } else {
+    // Pas de préférence sauvegardée — on suit le système, on met juste l'icône
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.getElementById('theme-btn').textContent = systemDark ? '☀️' : '🌙';
+  }
+}
+
+initVehicleButtons();
+initTheme();
 loadData();
+
+// Re-render graphiques si la fenêtre change de taille (debounce 200ms)
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    if(document.getElementById('tab-stats').style.display !== 'none') renderStats();
+  }, 200);
+});
 </script>
 </body>
 </html>
