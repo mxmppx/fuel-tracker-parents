@@ -379,7 +379,8 @@ function updatePreview() {
   document.getElementById('prev-prix').textContent=prix?prix.toFixed(2):'—';
   document.getElementById('prev-p100').textContent=(prix&&km)?(prix/km*100).toFixed(2):'—';
   document.getElementById('prev-auto-th').textContent=conso?Math.round(cap/conso*100):'—';
-  document.getElementById('prev-auto-re').textContent=(conso&&l)?Math.round((cap-l)/conso*100):'—';
+  const autoRe = (conso&&l) ? Math.round((cap-l)/conso*100) : null;
+  document.getElementById('prev-auto-re').textContent = (autoRe!=null && autoRe>=0) ? autoRe : '—';
   if(km) checkKmWarning(km, vehicule);
   else { document.getElementById('km-warning').classList.remove('visible'); document.getElementById('km').classList.remove('warn','error-field'); }
 }
@@ -1062,7 +1063,7 @@ function renderHisto(){
   const rows=data.map(r=>{
     const lim=vConsoLimits(r.vehicule);
     const suspect=(r.l_aux_100&&(r.l_aux_100<lim.min||r.l_aux_100>lim.max))||r.litres>vReservoir(r.vehicule)*1.1||r.km<20;
-    return`<tr style="${suspect?'background:var(--warn-bg)':''}"><td>${fmtDate(r.created_at)}</td><td><span class="badge ${r.vehicule}" style="background:${vColor(r.vehicule)}20;color:${vColor(r.vehicule)}">${vEmoji(r.vehicule)} ${vLabel(r.vehicule)}</span></td><td>${r.km} km</td><td>${r.litres} L</td><td>${r.chf_par_litre} CHF</td><td>${r.l_aux_100??'—'} L/100</td><td>${r.prix_paye??'—'} CHF</td><td>${r.autonomie_theorique??'—'} km</td><td>${r.autonomie_restante??'—'} km</td><td style="white-space:nowrap"><button class="action-btn" onclick='openEditModal(${JSON.stringify(r)})' title="Modifier">✏️</button><button class="action-btn" onclick="deletePlein('${r.id}')" title="Supprimer">🗑️</button></td></tr>`;
+    return`<tr style="${suspect?'background:var(--warn-bg)':''}"><td>${fmtDate(r.created_at)}</td><td><span class="badge ${r.vehicule}" style="background:${vColor(r.vehicule)}20;color:${vColor(r.vehicule)}">${vEmoji(r.vehicule)} ${vLabel(r.vehicule)}</span></td><td>${r.km} km</td><td>${r.litres} L</td><td>${r.chf_par_litre} CHF</td><td>${r.l_aux_100??'—'} L/100</td><td>${r.prix_paye??'—'} CHF</td><td>${r.autonomie_theorique??'—'} km</td><td>${(r.autonomie_restante==null||r.autonomie_restante<0)?'—':r.autonomie_restante+' km'}</td><td style="white-space:nowrap"><button class="action-btn" onclick='openEditModal(${JSON.stringify(r)})' title="Modifier">✏️</button><button class="action-btn" onclick="deletePlein('${r.id}')" title="Supprimer">🗑️</button></td></tr>`;
   }).join('');
   el.innerHTML=`<div style="overflow-x:auto"><table><thead><tr><th>Date</th><th>Véhicule</th><th>Km</th><th>Litres</th><th>CHF/L</th><th>L/100</th><th>Prix</th><th>Auto. théo.</th><th>Auto. rest.</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;
 }
