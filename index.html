@@ -198,7 +198,7 @@
       <div class="field"><label>Date</label><input type="date" id="edit-date"></div>
     </div>
     <input type="hidden" id="edit-id">
-    <input type="hidden" id="edit-vehicule-val" value="moto">
+    <input type="hidden" id="edit-vehicule-val" value="skoda_octavia">
     <div class="modal-actions">
       <button class="btn-cancel" onclick="document.getElementById('edit-modal').classList.remove('open')">Annuler</button>
       <button class="btn-save" onclick="saveEdit()">Enregistrer</button>
@@ -269,8 +269,8 @@
           <p style="margin-bottom:6px;color:var(--text3);font-size:0.78rem;text-transform:uppercase;letter-spacing:.05em">Migration initiale (à faire une seule fois)</p>
           <pre style="background:var(--input-bg);border-radius:8px;padding:12px;overflow-x:auto;font-size:0.8rem;margin-bottom:12px">-- Renommer les anciens IDs génériques vers les IDs précis
 UPDATE pleins SET vehicule = 'skoda_octavia' WHERE vehicule = 'voiture';
-UPDATE pleins SET vehicule = 'mg3'           WHERE vehicule = 'moto';</pre>
-          <p style="margin-bottom:6px;color:var(--text3);font-size:0.78rem;text-transform:uppercase;letter-spacing:.05em">Lors d'un changement futur (ex: Low Rider → nouvelle moto)</p>
+UPDATE pleins SET vehicule = 'mg3'           WHERE vehicule = 'mg3_old';</pre>
+          <p style="margin-bottom:6px;color:var(--text3);font-size:0.78rem;text-transform:uppercase;letter-spacing:.05em">Lors d'un changement futur (ex: MG3 → nouvelle voiture)</p>
           <pre style="background:var(--input-bg);border-radius:8px;padding:12px;overflow-x:auto;font-size:0.8rem;margin-bottom:8px">-- NE PAS lancer — exemple uniquement, adapter les IDs
 -- Les pleins de 'low_rider' restent intacts dans l'historique.
 -- Ajouter le nouveau véhicule dans VEHICLES{} avec actif:true,
@@ -296,14 +296,14 @@ UPDATE pleins SET vehicule = 'mg3'           WHERE vehicule = 'moto';</pre>
 
 </div>
 <script>
-const SUPABASE_URL='https://xusfllssepnengiusigk.supabase.co';
-const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1c2ZsbHNzZXBuZW5naXVzaWdrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzMjAzMDMsImV4cCI6MjA5NTg5NjMwM30.btp-bMfnRFcBNwi1lsszRub1IRiXveUXHcQ1O4t5wTw';
+const SUPABASE_URL='https://sgmsgcclwyvzxdeucdba.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNnbXNnY2Nsd3l2enhkZXVjZGJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4MjY5NTgsImV4cCI6MjA5NjQwMjk1OH0.r87yMr3IfWoxj_La5_326kEjJpN2aa9BbiRTYIxhXD8';
 // ═══════════════════════════════════════════════════════════════════
 // CONFIGURATION VÉHICULES
 //
 // Chaque entrée = un véhicule physique distinct.
 // • id       : clé stockée en DB — immuable, jamais modifier après migration
-// • categorie: 'moto' ou 'voiture' — sert aux filtres et regroupements
+// • categorie: 'voiture' — sert aux filtres et regroupements
 // • label    : nom affiché dans toute l'interface
 //
 // CHANGER DE VÉHICULE → ajouter une nouvelle entrée ici, lancer la
@@ -345,14 +345,14 @@ function vReservoir(id)  { return VEHICLES[id]?.reservoir ?? 50; }
 function vConsoLimits(id){ return VEHICLES[id]?.conso     ?? {min:2,max:25}; }
 function vCategorie(id)  { return VEHICLES[id]?.categorie ?? 'autre'; }
 
-// Filtre par catégorie (pour les boutons Tout/Moto/Voiture)
+// Filtre par catégorie ou par véhicule
 function vMatchCategorie(id, cat) {
   if(cat === 'all') return true;
   return vCategorie(id) === cat;
 }
 
 const MONTHS=['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
-let vehicule=V_IDS_ACTIF[0]??'harley_48', allData=[], histoFilter='all', pendingRows=[];
+let vehicule=V_IDS_ACTIF[0]??'skoda_octavia', allData=[], histoFilter='all', pendingRows=[];
 let filters={vehicule:'all', categorie:'all', year:'all', month:'all'};
 
 function api(path,opts={}) {
@@ -634,7 +634,7 @@ function populateYearFilter() {
 }
 
 function setVFilter(cat,el){
-  // cat can be 'all', a categorie ('moto','voiture'), or a vehicle id
+  // cat can be 'all', a categorie ('voiture'), or a vehicle id
   if(cat === 'all') {
     filters.categorie = 'all'; filters.vehicule = 'all';
   } else if(VEHICLES[cat]) {
