@@ -176,10 +176,9 @@
   <span style="font-size:1.4rem">⛽</span>
   <h1>Fuel Tracker</h1>
   <div class="tab-bar">
-    <button class="tab active" onclick="showTab('stats')">Stats</button>
+    <button class="tab" onclick="showTab('stats')">Stats</button>
     <button class="tab" onclick="showTab('historique')">Historique</button>
-    <button class="tab" onclick="showTab('saisie')">Saisie</button>
-    <button class="tab" onclick="showTab('import')">Import</button>
+    <button class="tab active" onclick="showTab('saisie')">Saisie</button>
   </div>
   <button id="theme-btn" onclick="toggleTheme()" style="margin-left:8px;background:none;border:1px solid var(--border);border-radius:8px;padding:7px 10px;cursor:pointer;font-size:1rem;color:var(--text2);transition:all 0.2s" title="Changer le thème">🌙</button>
 </header>
@@ -209,7 +208,7 @@
 
 <div class="container">
 
-  <div id="tab-stats">
+  <div id="tab-stats" style="display:none">
     <div class="filter-bar">
       <button class="filter-btn active" onclick="setVFilter('all',this)">Tout</button>
       <button class="filter-btn" onclick="setVFilter('skoda_octavia',this)">🚗 Skoda</button>
@@ -232,7 +231,7 @@
     </div>
   </div>
 
-  <div id="tab-saisie" style="display:none">
+  <div id="tab-saisie">
     <div class="card">
       <h2>Nouveau plein</h2>
       <div class="vehicle-toggle" id="saisie-toggle">
@@ -256,41 +255,6 @@
       </div>
       <button class="submit-btn" id="submit-btn" onclick="submitPlein()">Enregistrer le plein</button>
       <div id="msg"></div>
-    </div>
-  </div>
-
-  <div id="tab-import" style="display:none">
-    <div class="card">
-      <h2>📥 Import depuis Notion</h2>
-      <details style="margin-bottom:20px;border:1px solid var(--border);border-radius:10px;padding:16px">
-        <summary style="cursor:pointer;font-size:0.88rem;font-weight:600;color:var(--text2)">🔧 Migration SQL — changer de véhicule</summary>
-        <div style="margin-top:14px;font-size:0.83rem;color:var(--text2);line-height:1.6">
-          <p style="margin-bottom:10px">Lorsque tu changes de véhicule, lance ces requêtes dans <strong>Supabase → SQL Editor</strong> pour migrer les anciennes données vers le nouvel ID, puis mets à jour la config VEHICLES dans le code.</p>
-          <p style="margin-bottom:6px;color:var(--text3);font-size:0.78rem;text-transform:uppercase;letter-spacing:.05em">Migration initiale (à faire une seule fois)</p>
-          <pre style="background:var(--input-bg);border-radius:8px;padding:12px;overflow-x:auto;font-size:0.8rem;margin-bottom:12px">-- Renommer les anciens IDs génériques vers les IDs précis
-UPDATE pleins SET vehicule = 'skoda_octavia' WHERE vehicule = 'voiture';
-UPDATE pleins SET vehicule = 'mg3'           WHERE vehicule = 'mg3_old';</pre>
-          <p style="margin-bottom:6px;color:var(--text3);font-size:0.78rem;text-transform:uppercase;letter-spacing:.05em">Lors d'un changement futur (ex: MG3 → nouvelle voiture)</p>
-          <pre style="background:var(--input-bg);border-radius:8px;padding:12px;overflow-x:auto;font-size:0.8rem;margin-bottom:8px">-- NE PAS lancer — exemple uniquement, adapter les IDs
--- Les pleins de 'low_rider' restent intacts dans l'historique.
--- Ajouter le nouveau véhicule dans VEHICLES{} avec actif:true,
--- et passer low_rider à actif:false.</pre>
-          <p style="color:#f59e0b;font-size:0.78rem">⚠️ Toujours faire un Export CSV depuis l'onglet Historique avant de lancer une migration SQL.</p>
-        </div>
-      </details>
-      <p style="color:#888;font-size:0.88rem;margin-bottom:20px">Les doublons exacts seront automatiquement ignorés grâce à la contrainte d'unicité.</p>
-      <div class="import-zone" onclick="document.getElementById('file-input').click()" ondragover="event.preventDefault()" ondrop="event.preventDefault();handleFiles(event.dataTransfer.files)">
-        <div style="font-size:2rem">📂</div>
-        <p style="color:#666;margin-top:8px">Clique ou glisse tes fichiers CSV ici</p>
-      </div>
-      <input type="file" id="file-input" accept=".csv" multiple onchange="handleFiles(this.files)" style="display:none">
-      <div id="import-preview" style="display:none;background:var(--preview-bg);border-radius:8px;padding:16px;margin-bottom:16px;font-size:0.85rem"></div>
-      <button id="import-btn" onclick="doImport()" style="display:none;width:100%;padding:14px;border-radius:8px;border:none;background:#059669;color:#fff;font-size:1rem;font-weight:600;cursor:pointer"></button>
-      <div id="import-progress" style="display:none;margin-top:12px">
-        <div id="progress-text" style="font-size:0.82rem;color:#666"></div>
-        <div style="height:6px;background:#2a2a3a;border-radius:3px;overflow:hidden;margin-top:6px"><div id="progress-fill" style="height:100%;background:#059669;border-radius:3px;width:0%;transition:width 0.3s"></div></div>
-      </div>
-      <div id="import-msg" style="margin-top:12px"></div>
     </div>
   </div>
 
@@ -1105,9 +1069,9 @@ function renderHisto(){
 
 // ─── TABS ─────────────────────────────────────────────────────────
 function showTab(t){
-  ['stats','historique','saisie','import'].forEach(id=>{document.getElementById('tab-'+id).style.display=id===t?'block':'none';});
-  document.querySelectorAll('.tab').forEach((b,i)=>{b.classList.toggle('active',['stats','historique','saisie','import'][i]===t);});
-  if(t!=='saisie'&&t!=='import') loadData();
+  ['stats','historique','saisie'].forEach(id=>{document.getElementById('tab-'+id).style.display=id===t?'block':'none';});
+  document.querySelectorAll('.tab').forEach((b,i)=>{b.classList.toggle('active',['stats','historique','saisie'][i]===t);});
+  if(t!=='saisie') loadData();
 }
 
 function toggleTheme() {
