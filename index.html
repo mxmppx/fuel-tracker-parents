@@ -1075,33 +1075,40 @@ function showTab(t){
   if(t!=='saisie') loadData();
 }
 
+// ─── THEME ────────────────────────────────────────────────────────
+// Au chargement, on suit TOUJOURS le thème de l'appareil (pas de persistance).
+// Le bouton permet de basculer temporairement le thème pour la session en
+// cours uniquement ; rouvrir la page revient au thème système.
 function toggleTheme() {
   const root = document.documentElement;
   const current = root.getAttribute('data-theme');
-  // Si pas de data-theme, on détecte le thème système actuel
   const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
   const isDark = current === 'dark' || (!current && systemDark);
   const next = isDark ? 'light' : 'dark';
   root.setAttribute('data-theme', next);
   document.getElementById('theme-btn').textContent = next === 'dark' ? '☀️' : '🌙';
-  localStorage.setItem('ft-theme', next);
 }
 
 function initTheme() {
-  const saved = localStorage.getItem('ft-theme');
-  if(saved) {
-    document.documentElement.setAttribute('data-theme', saved);
-    document.getElementById('theme-btn').textContent = saved === 'dark' ? '☀️' : '🌙';
-  } else {
-    // Pas de préférence sauvegardée — on suit le système, on met juste l'icône
-    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    document.getElementById('theme-btn').textContent = systemDark ? '☀️' : '🌙';
-  }
+  // Pas de lecture de préférence sauvegardée — on suit le thème système.
+  // On ne pose pas data-theme ici : le CSS @media (prefers-color-scheme)
+  // s'en occupe déjà. On met juste l'icône du bouton à jour.
+  const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  document.getElementById('theme-btn').textContent = systemDark ? '☀️' : '🌙';
 }
 
 initVehicleButtons();
 initTheme();
 loadData();
+
+// Si le thème système change pendant que l'app est ouverte (et que
+// l'utilisateur n'a pas basculé manuellement via le bouton), on met
+// l'icône à jour pour rester cohérent.
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+  if (!document.documentElement.getAttribute('data-theme')) {
+    document.getElementById('theme-btn').textContent = e.matches ? '☀️' : '🌙';
+  }
+});
 
 // Re-render graphiques si la fenêtre change de taille (debounce 200ms)
 let resizeTimer;
